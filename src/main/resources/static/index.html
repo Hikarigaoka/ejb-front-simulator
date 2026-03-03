@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EJB API Client</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Segoe UI', Consolas, 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── タイトルバー ─────────────────────── */
+        .title-bar {
+            background: #323233;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+            font-size: 12px;
+            color: #cccccc;
+            flex-shrink: 0;
+            border-bottom: 1px solid #252526;
+            user-select: none;
+        }
+        .title-bar .app-icon { color: #75beff; font-size: 14px; }
+        .title-bar .app-name { font-weight: 600; }
+        .title-bar .app-sub  { color: #858585; font-size: 11px; }
+
+        /* ── ツールバー ───────────────────────── */
+        .toolbar {
+            background: #252526;
+            padding: 7px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        .toolbar-label {
+            font-size: 11px;
+            color: #858585;
+            white-space: nowrap;
+        }
+        .method-select {
+            background: #3c3c3c;
+            border: 1px solid #555;
+            color: #4ec9b0;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            min-width: 75px;
+        }
+        .method-select:focus { border-color: #007acc; }
+
+        .endpoint-input {
+            background: #3c3c3c;
+            border: 1px solid #555;
+            color: #d4d4d4;
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 3px;
+            outline: none;
+            flex: 1;
+            font-family: Consolas, 'Courier New', monospace;
+            min-width: 0;
+        }
+        .endpoint-input:focus { border-color: #007acc; }
+
+        .btn-request {
+            background: #0e639c;
+            color: #ffffff;
+            border: none;
+            padding: 5px 18px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .btn-request:hover:not(:disabled) { background: #1177bb; }
+        .btn-request:disabled {
+            background: #3c3c3c;
+            color: #858585;
+            cursor: not-allowed;
+        }
+
+        .kbd-hint {
+            font-size: 10px;
+            color: #858585;
+            white-space: nowrap;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: Consolas, monospace;
+        }
+
+        /* ── エディター領域 ────────────────────── */
+        .editors-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .editor-panel + .editor-panel {
+            border-left: 2px solid #252526;
+        }
+
+        /* タブバー */
+        .editor-tab {
+            background: #2d2d2d;
+            height: 35px;
+            display: flex;
+            align-items: stretch;
+            flex-shrink: 0;
+            border-bottom: 1px solid #252526;
+        }
+        .tab-file {
+            padding: 0 14px;
+            font-size: 12px;
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: #1e1e1e;
+            border-top: 1px solid #007acc;
+            border-right: 1px solid #252526;
+        }
+        .tab-file .file-dot { font-size: 9px; color: #e8c070; }
+        .tab-meta {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            gap: 12px;
+        }
+        .meta-tag {
+            font-size: 11px;
+            font-family: Consolas, monospace;
+        }
+        .c-ok    { color: #4ec9b0; }
+        .c-err   { color: #f44747; }
+        .c-info  { color: #9cdcfe; }
+        .c-warn  { color: #ce9178; }
+
+        /* エディター本体 */
+        .editor-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── ステータスバー ────────────────────── */
+        .status-bar {
+            background: #007acc;
+            color: #ffffff;
+            font-size: 11px;
+            height: 22px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+            font-family: Consolas, monospace;
+            transition: background 0.2s;
+        }
+        .status-bar.s-error   { background: #c72e0f; }
+        .status-bar.s-success { background: #388a34; }
+        .status-bar.s-loading { background: #5f5f5f; }
+
+        /* スピナー */
+        .spinner {
+            display: inline-block;
+            width: 9px; height: 9px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- ─── タイトルバー ─────────────────────────────── -->
+<div class="title-bar">
+    <span class="app-icon">&#x2b21;</span>
+    <span class="app-name">EJB API Client</span>
+    <span class="app-sub">— Spring Boot</span>
+</div>
+
+<!-- ─── ツールバー ───────────────────────────────── -->
+<div class="toolbar">
+    <span class="toolbar-label">Endpoint:</span>
+
+    <select id="method" class="method-select">
+        <option value="POST">POST</option>
+        <option value="GET">GET</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select>
+
+    <input type="text" id="endpoint" class="endpoint-input"
+           value="/api/process"
+           placeholder="/api/process">
+
+    <button id="requestBtn" class="btn-request" onclick="sendRequest()">
+        <span>&#9654;</span>
+        <span>Request</span>
+    </button>
+
+    <span class="kbd-hint">Ctrl+Enter</span>
+</div>
+
+<!-- ─── エディター ───────────────────────────────── -->
+<div class="editors-area">
+
+    <!-- リクエスト -->
+    <div class="editor-panel">
+        <div class="editor-tab">
+            <div class="tab-file">
+                <span class="file-dot">&#9679;</span>
+                <span>request.json</span>
+            </div>
+            <div class="tab-meta">
+                <span id="inputLines" class="meta-tag c-info"></span>
+                <span id="inputBytes" class="meta-tag c-info"></span>
+            </div>
+        </div>
+        <div id="input-editor" class="editor-wrapper"></div>
+    </div>
+
+    <!-- レスポンス -->
+    <div class="editor-panel">
+        <div class="editor-tab">
+            <div class="tab-file">
+                <span class="file-dot">&#9679;</span>
+                <span>response.json</span>
+            </div>
+            <div class="tab-meta">
+                <span id="respHttpStatus" class="meta-tag"></span>
+                <span id="respTime"       class="meta-tag c-info"></span>
+            </div>
+        </div>
+        <div id="output-editor" class="editor-wrapper"></div>
+    </div>
+
+</div>
+
+<!-- ─── ステータスバー ──────────────────────────── -->
+<div id="statusBar" class="status-bar">
+    <span>&#10003; Ready</span>
+    <span>EJB API Demo</span>
+</div>
+
+<!-- ─── Monaco Editor (CDN) ────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script>
+    let inputEditor, outputEditor;
+
+    /* Monaco 初期化 */
+    require.config({
+        paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' }
+    });
+
+    require(['vs/editor/editor.main'], function () {
+
+        const EDITOR_OPTS = {
+            language: 'json',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 13,
+            lineHeight: 20,
+            fontFamily: "'Cascadia Code', Consolas, 'Courier New', monospace",
+            fontLigatures: true,
+            minimap:  { enabled: false },
+            scrollBeyondLastLine: false,
+            tabSize: 2,
+            renderWhitespace: 'boundary',
+            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+        };
+
+        const defaultRequest = JSON.stringify({
+            operationType: "getCustomer",
+            data: {
+                customerId:    "C001",
+                includeOrders: true
+            }
+        }, null, 2);
+
+        /* ── リクエストエディター (編集可能) */
+        inputEditor = monaco.editor.create(
+            document.getElementById('input-editor'),
+            { ...EDITOR_OPTS, value: defaultRequest, formatOnPaste: true, formatOnType: true }
+        );
+
+        /* ── レスポンスエディター (読み取り専用) */
+        outputEditor = monaco.editor.create(
+            document.getElementById('output-editor'),
+            {
+                ...EDITOR_OPTS,
+                value: '// Request ボタンを押してください (Ctrl+Enter)',
+                readOnly: true
+            }
+        );
+
+        /* 入力サイズ表示 */
+        const updateInputMeta = () => {
+            const v = inputEditor.getValue();
+            document.getElementById('inputLines').textContent =
+                v.split('\n').length + ' lines';
+            document.getElementById('inputBytes').textContent =
+                fmtBytes(new TextEncoder().encode(v).length);
+        };
+        inputEditor.onDidChangeModelContent(updateInputMeta);
+        updateInputMeta();
+
+        /* エディター内 Ctrl+Enter ショートカット */
+        inputEditor.addCommand(
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+            sendRequest
+        );
+    });
+
+    /* ─────────────────────────────────────────────── */
+    async function sendRequest() {
+        const btn            = document.getElementById('requestBtn');
+        const statusBar      = document.getElementById('statusBar');
+        const respHttpStatus = document.getElementById('respHttpStatus');
+        const respTime       = document.getElementById('respTime');
+
+        /* JSON バリデーション */
+        let body;
+        try {
+            body = JSON.parse(inputEditor.getValue());
+        } catch (e) {
+            setStatus('error', 'JSON Parse Error: ' + e.message);
+            outputEditor.setValue(JSON.stringify({
+                error:   'Invalid JSON',
+                message: e.message,
+                hint:    'リクエスト JSON を確認してください'
+            }, null, 2));
+            respHttpStatus.textContent  = 'JSON Error';
+            respHttpStatus.className    = 'meta-tag c-err';
+            respTime.textContent        = '';
+            return;
+        }
+
+        /* ローディング状態 */
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span><span>Requesting…</span>';
+        setStatus('loading', 'EJB サービスを呼び出し中…');
+        respHttpStatus.textContent = '';
+        respTime.textContent       = '';
+
+        const endpoint = document.getElementById('endpoint').value;
+        const method   = document.getElementById('method').value;
+        const t0       = performance.now();
+
+        try {
+            const opts = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept':       'application/json'
+                }
+            };
+            if (method !== 'GET' && method !== 'DELETE') {
+                opts.body = JSON.stringify(body);
+            }
+
+            const res     = await fetch(endpoint, opts);
+            const elapsed = Math.round(performance.now() - t0);
+            const text    = await res.text();
+
+            /* レスポンス表示 */
+            try {
+                outputEditor.setValue(JSON.stringify(JSON.parse(text), null, 2));
+            } catch {
+                outputEditor.setValue(text);
+            }
+
+            respTime.textContent = elapsed + ' ms';
+
+            if (res.ok) {
+                setStatus('success', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
+                respHttpStatus.textContent = 'HTTP ' + res.status;
+                respHttpStatus.className   = 'meta-tag c-ok';
+            } else {
+                setStatus('error', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
+                respHttpStatus.textContent = 'HTTP ' + res.status;
+                respHttpStatus.className   = 'meta-tag c-err';
+            }
+
+        } catch (e) {
+            const elapsed = Math.round(performance.now() - t0);
+            setStatus('error', 'Network Error: ' + e.message);
+            outputEditor.setValue(JSON.stringify({
+                error:   'Network Error',
+                message: e.message,
+                hint:    'サーバーが起動しているか確認してください'
+            }, null, 2));
+            respHttpStatus.textContent = 'Error';
+            respHttpStatus.className   = 'meta-tag c-err';
+            respTime.textContent       = elapsed + ' ms';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>&#9654;</span><span>Request</span>';
+        }
+    }
+
+    function setStatus(type, msg) {
+        const bar = document.getElementById('statusBar');
+        bar.textContent = msg;
+        bar.className   = 'status-bar';
+        if (type === 'error')   bar.classList.add('s-error');
+        if (type === 'success') bar.classList.add('s-success');
+        if (type === 'loading') bar.classList.add('s-loading');
+    }
+
+    function fmtBytes(b) {
+        return b < 1024 ? b + ' B' : (b / 1024).toFixed(1) + ' KB';
+    }
+
+    /* ブラウザ全体の Ctrl+Enter */
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            sendRequest();
+        }
+    });
+</script>
+</body>
+</html>
