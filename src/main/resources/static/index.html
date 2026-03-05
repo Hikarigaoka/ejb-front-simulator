@@ -50,39 +50,31 @@
             color: #858585;
             white-space: nowrap;
         }
-        .method-select {
+        .toolbar-sep {
+            width: 1px;
+            height: 20px;
+            background: #4a4a4a;
+            flex-shrink: 0;
+            margin: 0 4px;
+        }
+
+        .dto-select {
             background: #3c3c3c;
             border: 1px solid #555;
-            color: #4ec9b0;
+            color: #9cdcfe;
             padding: 4px 8px;
             font-size: 12px;
-            font-weight: 700;
             border-radius: 3px;
             outline: none;
             cursor: pointer;
-            min-width: 75px;
-        }
-        .method-select:focus { border-color: #007acc; }
-
-        .endpoint-input {
-            background: #3c3c3c;
-            border: 1px solid #555;
-            color: #d4d4d4;
-            padding: 4px 10px;
-            font-size: 12px;
-            border-radius: 3px;
-            outline: none;
-            flex: 1;
+            min-width: 180px;
             font-family: Consolas, 'Courier New', monospace;
-            min-width: 0;
         }
-        .endpoint-input:focus { border-color: #007acc; }
+        .dto-select:focus { border-color: #007acc; }
 
-        .btn-request {
-            background: #0e639c;
-            color: #ffffff;
+        .btn {
             border: none;
-            padding: 5px 18px;
+            padding: 5px 14px;
             font-size: 12px;
             font-weight: 500;
             border-radius: 3px;
@@ -93,8 +85,19 @@
             gap: 6px;
             flex-shrink: 0;
         }
+        .btn-schema {
+            background: #4a3f7a;
+            color: #c5b8f8;
+        }
+        .btn-schema:hover:not(:disabled) { background: #5a4e8a; }
+
+        .btn-request {
+            background: #0e639c;
+            color: #ffffff;
+        }
         .btn-request:hover:not(:disabled) { background: #1177bb; }
-        .btn-request:disabled {
+
+        .btn:disabled {
             background: #3c3c3c;
             color: #858585;
             cursor: not-allowed;
@@ -167,11 +170,50 @@
         .c-warn  { color: #ce9178; }
 
         /* エディター本体 */
+        .editor-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         .editor-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
+
+        /* ── toString セクション ──────────────── */
+        .tostring-section {
+            flex-shrink: 0;
+            height: 90px;
+            border-top: 1px solid #3c3c3c;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+        }
+        .tostring-label {
+            font-size: 10px;
+            color: #858585;
+            padding: 3px 10px;
+            background: #252526;
+            border-bottom: 1px solid #3c3c3c;
+            font-family: Consolas, monospace;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .tostring-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 10px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 11px;
+            color: #ce9178;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        .tostring-content.placeholder { color: #555; }
 
         /* ── ステータスバー ────────────────────── */
         .status-bar {
@@ -215,22 +257,22 @@
 
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
-    <span class="toolbar-label">Endpoint:</span>
+    <span class="toolbar-label">DTO:</span>
 
-    <select id="method" class="method-select">
-        <option value="POST">POST</option>
-        <option value="GET">GET</option>
-        <option value="PUT">PUT</option>
-        <option value="DELETE">DELETE</option>
+    <select id="dtoSelect" class="dto-select">
+        <option value="">-- loading... --</option>
     </select>
 
-    <input type="text" id="endpoint" class="endpoint-input"
-           value="/api/process"
-           placeholder="/api/process">
+    <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchema()">
+        <span>&#x27a1;</span>
+        <span>DTO to JSON</span>
+    </button>
 
-    <button id="requestBtn" class="btn-request" onclick="sendRequest()">
+    <div class="toolbar-sep"></div>
+
+    <button id="requestBtn" class="btn btn-request" onclick="sendRequest()">
         <span>&#9654;</span>
-        <span>Request</span>
+        <span>Send</span>
     </button>
 
     <span class="kbd-hint">Ctrl+Enter</span>
@@ -251,7 +293,13 @@
                 <span id="inputBytes" class="meta-tag c-info"></span>
             </div>
         </div>
-        <div id="input-editor" class="editor-wrapper"></div>
+        <div class="editor-body">
+            <div id="input-editor" class="editor-wrapper"></div>
+            <div class="tostring-section">
+                <div class="tostring-label">RequestDto.toString()</div>
+                <div id="requestToString" class="tostring-content placeholder">// DTO to JSON または Send を実行してください</div>
+            </div>
+        </div>
     </div>
 
     <!-- レスポンス -->
@@ -266,7 +314,13 @@
                 <span id="respTime"       class="meta-tag c-info"></span>
             </div>
         </div>
-        <div id="output-editor" class="editor-wrapper"></div>
+        <div class="editor-body">
+            <div id="output-editor" class="editor-wrapper"></div>
+            <div class="tostring-section">
+                <div class="tostring-label">ResponseDto.toString()</div>
+                <div id="responseToString" class="tostring-content placeholder">// Send を実行してください</div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -323,7 +377,7 @@
             document.getElementById('output-editor'),
             {
                 ...EDITOR_OPTS,
-                value: '// Request ボタンを押してください (Ctrl+Enter)',
+                value: '// Send ボタンを押してください (Ctrl+Enter)',
                 readOnly: true
             }
         );
@@ -346,10 +400,61 @@
         );
     });
 
-    /* ─────────────────────────────────────────────── */
+    /* ── ページロード時にDTO一覧を取得 ─────────── */
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res  = await fetch('/api/dto/list');
+            const list = await res.json();
+            const sel  = document.getElementById('dtoSelect');
+            sel.innerHTML = '';
+            if (list.length === 0) {
+                sel.innerHTML = '<option value="">（Req DTOなし）</option>';
+            } else {
+                list.forEach(name => {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch (e) {
+            document.getElementById('dtoSelect').innerHTML =
+                '<option value="">（取得エラー）</option>';
+        }
+    });
+
+    /* ── DTO → JSON ─────────────────────────────── */
+    async function loadDtoSchema() {
+        const sel = document.getElementById('dtoSelect');
+        const className = sel.value;
+        if (!className) return;
+
+        const btn = document.getElementById('schemaBtn');
+        btn.disabled = true;
+        setStatus('loading', className + ' をロード中…');
+
+        try {
+            const res  = await fetch('/api/dto/schema/' + encodeURIComponent(className));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            inputEditor.setValue(JSON.stringify(data.json, null, 2));
+
+            const reqTs = document.getElementById('requestToString');
+            reqTs.textContent = data.toStringValue || '';
+            reqTs.classList.remove('placeholder');
+
+            setStatus('', className + ' のスキーマを表示しました');
+        } catch (e) {
+            setStatus('error', 'DTOロードエラー: ' + e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    /* ── Send Request ────────────────────────────── */
     async function sendRequest() {
         const btn            = document.getElementById('requestBtn');
-        const statusBar      = document.getElementById('statusBar');
         const respHttpStatus = document.getElementById('respHttpStatus');
         const respTime       = document.getElementById('respTime');
 
@@ -361,47 +466,49 @@
             setStatus('error', 'JSON Parse Error: ' + e.message);
             outputEditor.setValue(JSON.stringify({
                 error:   'Invalid JSON',
-                message: e.message,
-                hint:    'リクエスト JSON を確認してください'
+                message: e.message
             }, null, 2));
-            respHttpStatus.textContent  = 'JSON Error';
-            respHttpStatus.className    = 'meta-tag c-err';
-            respTime.textContent        = '';
+            respHttpStatus.textContent = 'JSON Error';
+            respHttpStatus.className   = 'meta-tag c-err';
+            respTime.textContent       = '';
             return;
         }
 
-        /* ローディング状態 */
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span><span>Requesting…</span>';
+        btn.innerHTML = '<span class="spinner"></span><span>Sending…</span>';
         setStatus('loading', 'EJB サービスを呼び出し中…');
         respHttpStatus.textContent = '';
         respTime.textContent       = '';
 
-        const endpoint = document.getElementById('endpoint').value;
-        const method   = document.getElementById('method').value;
-        const t0       = performance.now();
+        const t0 = performance.now();
 
         try {
-            const opts = {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept':       'application/json'
-                }
-            };
-            if (method !== 'GET' && method !== 'DELETE') {
-                opts.body = JSON.stringify(body);
-            }
-
-            const res     = await fetch(endpoint, opts);
+            const res     = await fetch('/api/process', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body:    JSON.stringify(body)
+            });
             const elapsed = Math.round(performance.now() - t0);
             const text    = await res.text();
 
-            /* レスポンス表示 */
-            try {
-                outputEditor.setValue(JSON.stringify(JSON.parse(text), null, 2));
-            } catch {
-                outputEditor.setValue(text);
+            let parsed;
+            try { parsed = JSON.parse(text); } catch { parsed = null; }
+
+            /* レスポンスJSON表示 */
+            if (parsed && parsed.responseJson !== undefined) {
+                outputEditor.setValue(JSON.stringify(parsed.responseJson, null, 2));
+
+                /* RequestDto toString */
+                const reqTs = document.getElementById('requestToString');
+                reqTs.textContent = parsed.requestToString || '';
+                reqTs.classList.remove('placeholder');
+
+                /* ResponseDto toString */
+                const resTs = document.getElementById('responseToString');
+                resTs.textContent = parsed.responseToString || '';
+                resTs.classList.remove('placeholder');
+            } else {
+                outputEditor.setValue(parsed ? JSON.stringify(parsed, null, 2) : text);
             }
 
             respTime.textContent = elapsed + ' ms';
@@ -419,24 +526,21 @@
         } catch (e) {
             const elapsed = Math.round(performance.now() - t0);
             setStatus('error', 'Network Error: ' + e.message);
-            outputEditor.setValue(JSON.stringify({
-                error:   'Network Error',
-                message: e.message,
-                hint:    'サーバーが起動しているか確認してください'
-            }, null, 2));
+            outputEditor.setValue(JSON.stringify({ error: 'Network Error', message: e.message }, null, 2));
             respHttpStatus.textContent = 'Error';
             respHttpStatus.className   = 'meta-tag c-err';
             respTime.textContent       = elapsed + ' ms';
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<span>&#9654;</span><span>Request</span>';
+            btn.innerHTML = '<span>&#9654;</span><span>Send</span>';
         }
     }
 
     function setStatus(type, msg) {
         const bar = document.getElementById('statusBar');
+        bar.className = 'status-bar';
+        if (!msg) { bar.textContent = '✓ Ready'; return; }
         bar.textContent = msg;
-        bar.className   = 'status-bar';
         if (type === 'error')   bar.classList.add('s-error');
         if (type === 'success') bar.classList.add('s-success');
         if (type === 'loading') bar.classList.add('s-loading');

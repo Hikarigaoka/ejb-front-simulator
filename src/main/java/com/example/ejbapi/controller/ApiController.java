@@ -2,7 +2,9 @@ package com.example.ejbapi.controller;
 
 import com.example.ejbapi.dto.ApiRequestDto;
 import com.example.ejbapi.dto.ApiResponseDto;
+import com.example.ejbapi.dto.ProcessResultDto;
 import com.example.ejbapi.ejb.EjbServiceInterface;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ import java.util.Map;
 public class ApiController {
 
     private final EjbServiceInterface ejbService;
+    private final ObjectMapper objectMapper;
 
     /**
      * EJBサービス呼び出しエンドポイント
@@ -40,13 +43,21 @@ public class ApiController {
      * @return EJBの処理結果DTO
      */
     @PostMapping("/process")
-    public ResponseEntity<ApiResponseDto> process(@RequestBody ApiRequestDto request) {
+    public ResponseEntity<ProcessResultDto> process(@RequestBody ApiRequestDto request) {
         log.info(">>> POST /api/process  operationType={}", request.getOperationType());
 
         ApiResponseDto response = ejbService.process(request);
 
         log.info("<<< status={} code={}", response.getStatus(), response.getCode());
-        return ResponseEntity.ok(response);
+
+        ProcessResultDto result = ProcessResultDto.builder()
+                .requestJson(objectMapper.valueToTree(request))
+                .requestToString(request.toString())
+                .responseJson(objectMapper.valueToTree(response))
+                .responseToString(response.toString())
+                .build();
+
+        return ResponseEntity.ok(result);
     }
 
     /**
