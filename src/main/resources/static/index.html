@@ -226,6 +226,13 @@
         }
         .btn-clear:hover:not(:disabled) { background: var(--btn-danger-hover); }
 
+        .btn-evidence {
+            background: #1a4a2e;
+            color: #7ec89a;
+            border: 1px solid #2a6e42;
+        }
+        .btn-evidence:hover:not(:disabled) { background: #245e3a; }
+
         .btn-add-tab {
             background: var(--bg-input);
             color: var(--text-secondary);
@@ -282,6 +289,14 @@
             color: var(--text-secondary);
             border-top: 2px solid var(--accent);
         }
+        .tab-check {
+            accent-color: var(--accent);
+            cursor: pointer;
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+
         .req-tab .tab-close {
             font-size: 14px;
             line-height: 1;
@@ -512,6 +527,13 @@
         <span>&#x2715;</span>
         <span>Clear</span>
     </button>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn-evidence" onclick="exportEvidence()" title="全タブのrequest/responseをHTMLファイルとして出力">
+        <span>&#128196;</span>
+        <span>エビデンス出力</span>
+    </button>
 </div>
 
 <!-- ─── リクエストI/F タブバー ───────────────────── -->
@@ -633,7 +655,8 @@
             outputEditor: null,
             logs: [],
             reqSubTab: 'json',
-            resSubTab: 'json'
+            resSubTab: 'json',
+            selected: true
         };
         tabs.push(tab);
         renderTabs();
@@ -679,6 +702,8 @@
 
             const title = `#${tab.number} ${tab.dtoName}`;
             el.innerHTML = `
+                <input type="checkbox" class="tab-check" ${tab.selected !== false ? 'checked' : ''}
+                       onclick="toggleTabSelect('${tab.id}', event)" title="エビデンス出力対象">
                 <span>${escapeHtml(title)}</span>
                 ${tabs.length > 1
                     ? `<span class="tab-close" onclick="removeTab('${tab.id}', event)" title="閉じる">&times;</span>`
@@ -1020,6 +1045,7 @@
         addLog(tab, 'req', `[SEND] POST /api/process`);
         addLog(tab, 'req', `[SEND] Body: ${JSON.stringify(body).substring(0, 200)}`);
 
+        tab._timestamp = new Date().toLocaleString('ja-JP');
         const t0 = performance.now();
 
         try {
@@ -1049,6 +1075,7 @@
                     reqTsContent.innerHTML = renderLinedText(parsed.requestToString || '');
                     updateSubTabMeta(tab.id, 'req', 'tostring', parsed.requestToString || '');
                 }
+                tab._requestToString = parsed.requestToString || '';
 
                 /* ResponseDto toString */
                 const resTosContent = document.getElementById('resTosContent-' + tab.id);
@@ -1056,12 +1083,16 @@
                     resTosContent.innerHTML = renderLinedText(parsed.responseToString || '');
                     updateSubTabMeta(tab.id, 'res', 'tostring', parsed.responseToString || '');
                 }
+                tab._responseToString = parsed.responseToString || '';
             } else {
                 const fallback = parsed ? JSON.stringify(parsed, null, 2) : text;
                 if (tab.outputEditor) tab.outputEditor.setValue(fallback);
             }
 
             if (respTime) respTime.textContent = elapsed + ' ms';
+            tab._httpStatus = res.status;
+            tab._httpStatusText = res.statusText;
+            tab._respTime = elapsed;
 
             if (res.ok) {
                 setStatus('success', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
@@ -1172,6 +1203,147 @@
         });
 
         setStatus('', 'クリアしました');
+    }
+
+    /* ── タブ選択トグル ───────────────────────── */
+    function toggleTabSelect(id, event) {
+        event.stopPropagation();
+        const tab = tabs.find(t => t.id === id);
+        if (tab) tab.selected = event.target.checked;
+    }
+
+    /* ── テストエビデンス出力 ─────────────────── */
+    function exportEvidence() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+        const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+        const displayTime = `${dateStr} ${timeStr.replace(/-/g, ':')}`;
+
+        const selectedTabs = tabs.filter(t => t.selected !== false);
+        if (selectedTabs.length === 0) {
+            setStatus('error', 'エビデンス出力対象のタブが選択されていません');
+            return;
+        }
+
+        const dtoNames = selectedTabs.map(t => t.dtoName.replace(/[\\/:*?"<>|]/g, '-')).join('_');
+        const fileName = `テストエビデンス_${dtoNames}_${dateStr}_${timeStr}.html`;
+
+        const e = s => String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        const cases = selectedTabs.map(tab => {
+            const reqJson        = tab.inputEditor  ? tab.inputEditor.getValue()  : '';
+            const resJson        = tab.outputEditor ? tab.outputEditor.getValue() : '';
+            const reqToString    = tab._requestToString  || '';
+            const resToString    = tab._responseToString || '';
+            const httpStatus     = tab._httpStatus     || '';
+            const httpStatusText = tab._httpStatusText || '';
+            const respTime       = tab._respTime != null ? tab._respTime + ' ms' : '';
+            const timestamp      = tab._timestamp || '(未実行)';
+            const reqLogs        = (tab._logs && tab._logs.req.length) ? tab._logs.req.join('\n') : '';
+            const resLogs        = (tab._logs && tab._logs.res.length) ? tab._logs.res.join('\n') : '';
+            const statusClass    = httpStatus >= 200 && httpStatus < 300 ? 'status-ok'
+                                 : httpStatus ? 'status-err' : 'status-none';
+
+            const reqTsBlock = reqToString
+                ? `<div class="section-title">Request toString</div><pre>${e(reqToString)}</pre>`
+                : '';
+            const resTosBlock = resToString
+                ? `<div class="section-title">Response toString</div><pre>${e(resToString)}</pre>`
+                : '';
+            const reqLogBlock = reqLogs
+                ? `<div class="section-title">Request Log</div><div class="log-area">${e(reqLogs)}</div>`
+                : '';
+            const resLogBlock = resLogs
+                ? `<div class="section-title">Response Log</div><div class="log-area">${e(resLogs)}</div>`
+                : '';
+
+            return `
+<div class="test-case">
+  <div class="test-case-header">
+    <span>#${tab.number} ${e(tab.dtoName)}</span>
+    <span style="font-weight:normal;font-size:11px;">実行: ${e(timestamp)}</span>
+  </div>
+  <div class="test-case-body">
+    <div class="status-row">
+      <div class="status-item">
+        <span class="status-label">HTTP Status:</span>
+        <span class="${statusClass}">${httpStatus ? e(httpStatus + ' ' + httpStatusText) : '(未実行)'}</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">応答時間:</span>
+        <span>${e(respTime || '-')}</span>
+      </div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <div class="section-title">Request JSON</div>
+        <pre>${e(reqJson)}</pre>
+        ${reqTsBlock}
+        ${reqLogBlock}
+      </div>
+      <div class="panel">
+        <div class="section-title">Response JSON</div>
+        <pre>${e(resJson)}</pre>
+        ${resTosBlock}
+        ${resLogBlock}
+      </div>
+    </div>
+  </div>
+</div>`;
+        }).join('\n');
+
+        const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>テストエビデンス ${displayTime}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Meiryo',sans-serif; margin:24px; color:#1e1e1e; background:#fff; font-size:13px; }
+h1 { font-size:20px; border-bottom:3px solid #007acc; padding-bottom:10px; margin-bottom:6px; color:#007acc; }
+.meta { font-size:12px; color:#666; margin-bottom:24px; }
+.test-case { border:1px solid #ccc; margin-bottom:20px; border-radius:4px; }
+.test-case-header { background:#007acc; color:#fff; padding:8px 14px; font-weight:bold; font-size:13px; display:flex; justify-content:space-between; align-items:center; border-radius:3px 3px 0 0; }
+.test-case-body { padding:14px; }
+.section-title { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; margin:10px 0 4px; }
+.section-title:first-child { margin-top:0; }
+.status-row { display:flex; gap:28px; margin-bottom:14px; font-size:12px; }
+.status-item { display:flex; align-items:center; gap:6px; }
+.status-label { color:#888; }
+.status-ok { color:#2e7d32; font-weight:bold; }
+.status-err { color:#c62828; font-weight:bold; }
+.status-none { color:#999; }
+.panels { display:flex; gap:14px; }
+.panel { flex:1; min-width:0; }
+pre { background:#f5f5f5; border:1px solid #ddd; padding:10px 12px; font-size:11px; font-family:Consolas,'Courier New',monospace; line-height:1.6; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; max-height:320px; }
+.log-area { background:#1e1e1e; color:#d4d4d4; padding:8px 12px; font-size:10px; font-family:Consolas,monospace; line-height:1.5; max-height:160px; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; }
+@media print {
+  body { margin:10px; }
+  .test-case { page-break-inside:avoid; }
+  pre { max-height:none !important; }
+  .log-area { max-height:none !important; }
+}
+</style>
+</head>
+<body>
+<h1>&#128196; テストエビデンス</h1>
+<div class="meta">出力日時: ${displayTime}&nbsp;&nbsp;|&nbsp;&nbsp;テストケース数: ${selectedTabs.length} 件</div>
+${cases}
+</body>
+</html>`;
+
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        setStatus('success', `エビデンス出力完了: ${fileName}`);
     }
 
     /* ── ユーティリティ ───────────────────────── */
