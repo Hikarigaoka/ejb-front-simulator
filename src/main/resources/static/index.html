@@ -1249,16 +1249,16 @@
                                  : httpStatus ? 'status-err' : 'status-none';
 
             const reqTsBlock = reqToString
-                ? `<div class="section-title">Request toString</div><pre>${e(reqToString)}</pre>`
+                ? `<details open><summary>Request toString</summary><pre>${e(reqToString)}</pre></details>`
                 : '';
             const resTosBlock = resToString
-                ? `<div class="section-title">Response toString</div><pre>${e(resToString)}</pre>`
+                ? `<details open><summary>Response toString</summary><pre>${e(resToString)}</pre></details>`
                 : '';
             const reqLogBlock = reqLogs
-                ? `<div class="section-title">Request Log</div><div class="log-area">${e(reqLogs)}</div>`
+                ? `<details open><summary>Request Log</summary><div class="log-area">${e(reqLogs)}</div></details>`
                 : '';
             const resLogBlock = resLogs
-                ? `<div class="section-title">Response Log</div><div class="log-area">${e(resLogs)}</div>`
+                ? `<details open><summary>Response Log</summary><div class="log-area">${e(resLogs)}</div></details>`
                 : '';
 
             return `
@@ -1278,20 +1278,12 @@
         <span>${e(respTime || '-')}</span>
       </div>
     </div>
-    <div class="panels">
-      <div class="panel">
-        <div class="section-title">Request JSON</div>
-        <pre>${e(reqJson)}</pre>
-        ${reqTsBlock}
-        ${reqLogBlock}
-      </div>
-      <div class="panel">
-        <div class="section-title">Response JSON</div>
-        <pre>${e(resJson)}</pre>
-        ${resTosBlock}
-        ${resLogBlock}
-      </div>
-    </div>
+    <details open><summary>Request JSON</summary><pre>${e(reqJson)}</pre></details>
+    <details open><summary>Response JSON</summary><pre>${e(resJson)}</pre></details>
+    ${reqTsBlock}
+    ${resTosBlock}
+    ${reqLogBlock}
+    ${resLogBlock}
   </div>
 </div>`;
         }).join('\n');
@@ -1309,21 +1301,22 @@ h1 { font-size:20px; border-bottom:3px solid #007acc; padding-bottom:10px; margi
 .test-case { border:1px solid #ccc; margin-bottom:20px; border-radius:4px; }
 .test-case-header { background:#007acc; color:#fff; padding:8px 14px; font-weight:bold; font-size:13px; display:flex; justify-content:space-between; align-items:center; border-radius:3px 3px 0 0; }
 .test-case-body { padding:14px; }
-.section-title { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; margin:10px 0 4px; }
-.section-title:first-child { margin-top:0; }
-.status-row { display:flex; gap:28px; margin-bottom:14px; font-size:12px; }
+.status-row { display:flex; gap:28px; margin-bottom:10px; font-size:12px; }
 .status-item { display:flex; align-items:center; gap:6px; }
 .status-label { color:#888; }
 .status-ok { color:#2e7d32; font-weight:bold; }
 .status-err { color:#c62828; font-weight:bold; }
 .status-none { color:#999; }
-.panels { display:flex; gap:14px; }
-.panel { flex:1; min-width:0; }
-pre { background:#f5f5f5; border:1px solid #ddd; padding:10px 12px; font-size:11px; font-family:Consolas,'Courier New',monospace; line-height:1.6; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; max-height:320px; }
-.log-area { background:#1e1e1e; color:#d4d4d4; padding:8px 12px; font-size:10px; font-family:Consolas,monospace; line-height:1.5; max-height:160px; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; }
+details { margin-top:8px; }
+details:first-of-type { margin-top:0; }
+summary { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; padding:4px 0; user-select:none; }
+summary:hover { color:#007acc; }
+pre { background:#f5f5f5; border:1px solid #ddd; padding:10px 12px; font-size:11px; font-family:Consolas,'Courier New',monospace; line-height:1.6; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; max-height:320px; margin-top:4px; }
+.log-area { background:#1e1e1e; color:#d4d4d4; padding:8px 12px; font-size:10px; font-family:Consolas,monospace; line-height:1.5; max-height:160px; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; margin-top:4px; }
 @media print {
   body { margin:10px; }
   .test-case { page-break-inside:avoid; }
+  details { open:true; }
   pre { max-height:none !important; }
   .log-area { max-height:none !important; }
 }
