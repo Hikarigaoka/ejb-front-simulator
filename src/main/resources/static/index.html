@@ -232,6 +232,18 @@
             border: 1px solid #2a6e42;
         }
         .btn-evidence:hover:not(:disabled) { background: #245e3a; }
+        .evidence-title-input {
+            height: 28px;
+            padding: 0 8px;
+            font-size: 12px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid #2a6e42;
+            border-radius: 4px;
+            width: 160px;
+            outline: none;
+        }
+        .evidence-title-input:focus { border-color: var(--accent); }
 
         .btn-add-tab {
             background: var(--bg-input);
@@ -530,6 +542,7 @@
 
     <div class="toolbar-sep"></div>
 
+    <input type="text" id="evidenceTitle" class="evidence-title-input" value="テストエビデンス" placeholder="エビデンスタイトル" title="エビデンスのタイトル">
     <button class="btn btn-evidence" onclick="exportEvidence()" title="全タブのrequest/responseをHTMLファイルとして出力">
         <span>&#128196;</span>
         <span>エビデンス出力</span>
@@ -1226,8 +1239,9 @@
             return;
         }
 
+        const evidenceTitle = document.getElementById('evidenceTitle').value.trim() || 'テストエビデンス';
         const dtoNames = selectedTabs.map(t => t.dtoName.replace(/[\\/:*?"<>|]/g, '-')).join('_');
-        const fileName = `テストエビデンス_${dtoNames}_${dateStr}_${timeStr}.html`;
+        const fileName = `${evidenceTitle.replace(/[\\/:*?"<>|]/g, '-')}_${dtoNames}_${dateStr}_${timeStr}.html`;
 
         const e = s => String(s)
             .replace(/&/g, '&amp;')
@@ -1292,7 +1306,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>テストエビデンス ${displayTime}</title>
+<title>${e(evidenceTitle)} ${displayTime}</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:'Segoe UI','Meiryo',sans-serif; margin:24px; color:#1e1e1e; background:#fff; font-size:13px; }
@@ -1323,7 +1337,7 @@ pre { background:#f5f5f5; border:1px solid #ddd; padding:10px 12px; font-size:11
 </style>
 </head>
 <body>
-<h1>&#128196; テストエビデンス</h1>
+<h1>&#128196; ${e(evidenceTitle)}</h1>
 <div class="meta">出力日時: ${displayTime}&nbsp;&nbsp;|&nbsp;&nbsp;テストケース数: ${selectedTabs.length} 件</div>
 ${cases}
 </body>
