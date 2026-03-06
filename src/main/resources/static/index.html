@@ -5,11 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EJB API Client</title>
     <style>
+        :root {
+            /* ── Dark テーマ (デフォルト) ── */
+            --bg-primary:    #1e1e1e;
+            --bg-secondary:  #252526;
+            --bg-tertiary:   #2d2d2d;
+            --bg-input:      #3c3c3c;
+            --bg-dark:       #1a1a1a;
+            --border-primary:   #252526;
+            --border-secondary: #3c3c3c;
+            --border-input:     #555;
+            --text-primary:   #d4d4d4;
+            --text-secondary: #cccccc;
+            --text-muted:     #858585;
+            --text-string:    #ce9178;
+            --text-keyword:   #9cdcfe;
+            --accent:         #007acc;
+            --accent-hover:   #1177bb;
+            --btn-schema-bg:  #4a3f7a;
+            --btn-schema-fg:  #c5b8f8;
+            --btn-schema-hover: #5a4e8a;
+            --btn-send-bg:    #0e639c;
+            --btn-send-fg:    #ffffff;
+            --btn-send-hover: #1177bb;
+            --btn-danger-bg:  #6e2020;
+            --btn-danger-fg:  #f8b8b8;
+            --btn-danger-hover: #8a2e2e;
+            --status-ok:      #388a34;
+            --status-error:   #c72e0f;
+            --status-loading: #5f5f5f;
+            --c-ok:    #4ec9b0;
+            --c-err:   #f44747;
+            --c-info:  #9cdcfe;
+            --c-warn:  #ce9178;
+            --tab-active-bg:  #1e1e1e;
+            --tab-dot:        #e8c070;
+            --log-bg:         #1a1a1a;
+            --line-num-bg:    #2a2a2a;
+            --line-num-fg:    #5a5a5a;
+            --title-bar-bg:   #323233;
+            --scrollbar-thumb: #424242;
+            --scrollbar-track: transparent;
+        }
+
+        body.light-theme {
+            --bg-primary:    #ffffff;
+            --bg-secondary:  #f3f3f3;
+            --bg-tertiary:   #ececec;
+            --bg-input:      #ffffff;
+            --bg-dark:       #f7f7f7;
+            --border-primary:   #e0e0e0;
+            --border-secondary: #d4d4d4;
+            --border-input:     #c0c0c0;
+            --text-primary:   #1e1e1e;
+            --text-secondary: #333333;
+            --text-muted:     #888888;
+            --text-string:    #a31515;
+            --text-keyword:   #0451a5;
+            --accent:         #007acc;
+            --accent-hover:   #005a9e;
+            --btn-schema-bg:  #e8e0f8;
+            --btn-schema-fg:  #4a3f7a;
+            --btn-schema-hover: #d8cef0;
+            --btn-send-bg:    #007acc;
+            --btn-send-fg:    #ffffff;
+            --btn-send-hover: #005a9e;
+            --btn-danger-bg:  #f8d0d0;
+            --btn-danger-fg:  #a02020;
+            --btn-danger-hover: #f0b0b0;
+            --status-ok:      #388a34;
+            --status-error:   #c72e0f;
+            --status-loading: #aaaaaa;
+            --c-ok:    #267f6e;
+            --c-err:   #c72e0f;
+            --c-info:  #0451a5;
+            --c-warn:  #a31515;
+            --tab-active-bg:  #ffffff;
+            --tab-dot:        #c08000;
+            --log-bg:         #f7f7f7;
+            --line-num-bg:    #f0f0f0;
+            --line-num-fg:    #999999;
+            --title-bar-bg:   #dddddd;
+            --scrollbar-thumb: #c0c0c0;
+            --scrollbar-track: transparent;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #1e1e1e;
-            color: #d4d4d4;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-family: 'Segoe UI', Consolas, 'Helvetica Neue', sans-serif;
             display: flex;
             flex-direction: column;
@@ -17,37 +102,60 @@
             overflow: hidden;
         }
 
+        /* ── スクロールバー ───────────────────── */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
         /* ── タイトルバー ─────────────────────── */
         .title-bar {
-            background: #323233;
+            background: var(--title-bar-bg);
             height: 30px;
             display: flex;
             align-items: center;
             padding: 0 14px;
             gap: 10px;
             font-size: 12px;
-            color: #cccccc;
+            color: var(--text-secondary);
             flex-shrink: 0;
-            border-bottom: 1px solid #252526;
+            border-bottom: 1px solid var(--border-primary);
             user-select: none;
         }
         .title-bar .app-icon { color: #75beff; font-size: 14px; }
         .title-bar .app-name { font-weight: 600; }
-        .title-bar .app-sub  { color: #858585; font-size: 11px; }
+        .title-bar .app-sub  { color: var(--text-muted); font-size: 11px; }
+        .title-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+        /* テーマ切替ボタン */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-input);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .theme-toggle:hover { background: var(--bg-input); }
+        .theme-toggle .theme-label { font-size: 10px; }
 
         /* ── ツールバー ───────────────────────── */
         .toolbar {
-            background: #252526;
+            background: var(--bg-secondary);
             padding: 7px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
-            border-bottom: 1px solid #3c3c3c;
+            border-bottom: 1px solid var(--border-secondary);
+            flex-wrap: wrap;
         }
         .toolbar-label {
             font-size: 11px;
-            color: #858585;
+            color: var(--text-muted);
             white-space: nowrap;
         }
         .toolbar-sep {
@@ -58,10 +166,25 @@
             margin: 0 4px;
         }
 
+        /* DTO検索テキストボックス */
+        .dto-search {
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            outline: none;
+            width: 140px;
+            font-family: Consolas, 'Courier New', monospace;
+        }
+        .dto-search:focus { border-color: var(--accent); }
+        .dto-search::placeholder { color: var(--text-muted); }
+
         .dto-select {
-            background: #3c3c3c;
-            border: 1px solid #555;
-            color: #9cdcfe;
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-keyword);
             padding: 4px 8px;
             font-size: 12px;
             border-radius: 3px;
@@ -70,7 +193,7 @@
             min-width: 180px;
             font-family: Consolas, 'Courier New', monospace;
         }
-        .dto-select:focus { border-color: #007acc; }
+        .dto-select:focus { border-color: var(--accent); }
 
         .btn {
             border: none;
@@ -86,32 +209,100 @@
             flex-shrink: 0;
         }
         .btn-schema {
-            background: #4a3f7a;
-            color: #c5b8f8;
+            background: var(--btn-schema-bg);
+            color: var(--btn-schema-fg);
         }
-        .btn-schema:hover:not(:disabled) { background: #5a4e8a; }
+        .btn-schema:hover:not(:disabled) { background: var(--btn-schema-hover); }
 
         .btn-request {
-            background: #0e639c;
-            color: #ffffff;
+            background: var(--btn-send-bg);
+            color: var(--btn-send-fg);
         }
-        .btn-request:hover:not(:disabled) { background: #1177bb; }
+        .btn-request:hover:not(:disabled) { background: var(--btn-send-hover); }
+
+        .btn-clear {
+            background: var(--btn-danger-bg);
+            color: var(--btn-danger-fg);
+        }
+        .btn-clear:hover:not(:disabled) { background: var(--btn-danger-hover); }
+
+        .btn-add-tab {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-input);
+        }
+        .btn-add-tab:hover { background: var(--bg-tertiary); }
 
         .btn:disabled {
-            background: #3c3c3c;
-            color: #858585;
+            background: var(--bg-input);
+            color: var(--text-muted);
             cursor: not-allowed;
         }
 
         .kbd-hint {
             font-size: 10px;
-            color: #858585;
+            color: var(--text-muted);
             white-space: nowrap;
-            border: 1px solid #555;
+            border: 1px solid var(--border-input);
             border-radius: 3px;
             padding: 1px 5px;
             font-family: Consolas, monospace;
         }
+
+        /* ── リクエストタブバー ──────────────── */
+        .request-tabs-bar {
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: stretch;
+            height: 32px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-primary);
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .request-tabs-bar::-webkit-scrollbar { height: 3px; }
+
+        .req-tab {
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            border-right: 1px solid var(--border-primary);
+            user-select: none;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .req-tab:hover { color: var(--text-secondary); }
+        .req-tab.active {
+            background: var(--tab-active-bg);
+            color: var(--text-secondary);
+            border-top: 2px solid var(--accent);
+        }
+        .req-tab .tab-close {
+            font-size: 14px;
+            line-height: 1;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        .req-tab .tab-close:hover { background: rgba(255,0,0,0.2); color: var(--c-err); }
+
+        .add-tab-btn {
+            padding: 0 10px;
+            font-size: 16px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .add-tab-btn:hover { color: var(--text-secondary); background: var(--bg-input); }
 
         /* ── エディター領域 ────────────────────── */
         .editors-area {
@@ -128,46 +319,56 @@
             overflow: hidden;
         }
         .editor-panel + .editor-panel {
-            border-left: 2px solid #252526;
+            border-left: 2px solid var(--border-primary);
         }
 
-        /* タブバー */
-        .editor-tab {
-            background: #2d2d2d;
-            height: 35px;
+        /* パネルヘッダー */
+        .panel-header {
+            background: var(--bg-secondary);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        /* サブタブ (JSON / toString / Log) */
+        .sub-tabs {
+            background: var(--bg-tertiary);
+            height: 28px;
             display: flex;
             align-items: stretch;
             flex-shrink: 0;
-            border-bottom: 1px solid #252526;
+            border-bottom: 1px solid var(--border-primary);
         }
-        .tab-file {
+        .sub-tab {
             padding: 0 14px;
-            font-size: 12px;
-            color: #cccccc;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            background: #1e1e1e;
-            border-top: 1px solid #007acc;
-            border-right: 1px solid #252526;
-        }
-        .tab-file .file-dot { font-size: 9px; color: #e8c070; }
-        .tab-meta {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 12px;
-            gap: 12px;
-        }
-        .meta-tag {
             font-size: 11px;
-            font-family: Consolas, monospace;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+            border-right: 1px solid var(--border-primary);
         }
-        .c-ok    { color: #4ec9b0; }
-        .c-err   { color: #f44747; }
-        .c-info  { color: #9cdcfe; }
-        .c-warn  { color: #ce9178; }
+        .sub-tab:hover { color: var(--text-secondary); }
+        .sub-tab.active {
+            background: var(--tab-active-bg);
+            color: var(--text-secondary);
+            border-top: 1px solid var(--accent);
+        }
+        .sub-tab .meta-tag {
+            font-size: 10px;
+            font-family: Consolas, monospace;
+            color: var(--c-info);
+        }
 
         /* エディター本体 */
         .editor-body {
@@ -177,47 +378,66 @@
             overflow: hidden;
         }
 
+        .sub-content {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sub-content.active {
+            display: flex;
+        }
+
         .editor-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
 
-        /* ── toString セクション ──────────────── */
-        .tostring-section {
-            flex-shrink: 0;
-            height: 90px;
-            border-top: 1px solid #3c3c3c;
-            display: flex;
-            flex-direction: column;
-            background: #1a1a1a;
-        }
-        .tostring-label {
-            font-size: 10px;
-            color: #858585;
-            padding: 3px 10px;
-            background: #252526;
-            border-bottom: 1px solid #3c3c3c;
-            font-family: Consolas, monospace;
-            flex-shrink: 0;
-            user-select: none;
-        }
-        .tostring-content {
+        /* ── 行番号付きテキストエリア ───────────── */
+        .lined-content {
             flex: 1;
-            overflow-y: auto;
-            padding: 6px 10px;
+            overflow: auto;
+            background: var(--bg-dark);
             font-family: Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .lined-content table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .lined-content td {
+            vertical-align: top;
+            padding: 0;
+        }
+        .lined-content .line-num {
+            width: 40px;
+            min-width: 40px;
+            text-align: right;
+            padding: 0 8px 0 4px;
+            color: var(--line-num-fg);
+            background: var(--line-num-bg);
+            user-select: none;
             font-size: 11px;
-            color: #ce9178;
+            border-right: 1px solid var(--border-secondary);
+        }
+        .lined-content .line-text {
+            padding: 0 10px;
             white-space: pre-wrap;
             word-break: break-all;
-            line-height: 1.5;
+            color: var(--text-string);
         }
-        .tostring-content.placeholder { color: #555; }
+        .lined-content.log-content .line-text {
+            color: var(--text-primary);
+        }
+        .lined-content .placeholder-row .line-text {
+            color: var(--text-muted);
+        }
 
         /* ── ステータスバー ────────────────────── */
         .status-bar {
-            background: #007acc;
+            background: var(--accent);
             color: #ffffff;
             font-size: 11px;
             height: 22px;
@@ -229,9 +449,9 @@
             font-family: Consolas, monospace;
             transition: background 0.2s;
         }
-        .status-bar.s-error   { background: #c72e0f; }
-        .status-bar.s-success { background: #388a34; }
-        .status-bar.s-loading { background: #5f5f5f; }
+        .status-bar.s-error   { background: var(--status-error); }
+        .status-bar.s-success { background: var(--status-ok); }
+        .status-bar.s-loading { background: var(--status-loading); }
 
         /* スピナー */
         .spinner {
@@ -253,76 +473,56 @@
     <span class="app-icon">&#x2b21;</span>
     <span class="app-name">EJB API Client</span>
     <span class="app-sub">— Spring Boot</span>
+    <div class="title-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="テーマ切替">
+            <span id="themeIcon">&#9790;</span>
+            <span class="theme-label" id="themeLabel">Dark</span>
+        </button>
+    </div>
 </div>
 
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
     <span class="toolbar-label">DTO:</span>
 
+    <input id="dtoSearch" class="dto-search" type="text"
+           placeholder="&#x1F50D; 検索..." oninput="filterDtoList()">
+
     <select id="dtoSelect" class="dto-select">
         <option value="">-- loading... --</option>
     </select>
 
-    <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchema()">
+    <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchemaToActiveTab()">
         <span>&#x27a1;</span>
         <span>DTO to JSON</span>
     </button>
 
     <div class="toolbar-sep"></div>
 
-    <button id="requestBtn" class="btn btn-request" onclick="sendRequest()">
+    <button id="requestBtn" class="btn btn-request" onclick="sendRequestFromActiveTab()">
         <span>&#9654;</span>
         <span>Send</span>
     </button>
 
     <span class="kbd-hint">Ctrl+Enter</span>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn-clear" onclick="clearActiveTab()">
+        <span>&#x2715;</span>
+        <span>Clear</span>
+    </button>
+</div>
+
+<!-- ─── リクエストI/F タブバー ───────────────────── -->
+<div class="request-tabs-bar" id="requestTabsBar">
+    <!-- 動的に生成 -->
+    <div class="add-tab-btn" onclick="addNewTab()" title="タブを追加">+</div>
 </div>
 
 <!-- ─── エディター ───────────────────────────────── -->
-<div class="editors-area">
-
-    <!-- リクエスト -->
-    <div class="editor-panel">
-        <div class="editor-tab">
-            <div class="tab-file">
-                <span class="file-dot">&#9679;</span>
-                <span>request.json</span>
-            </div>
-            <div class="tab-meta">
-                <span id="inputLines" class="meta-tag c-info"></span>
-                <span id="inputBytes" class="meta-tag c-info"></span>
-            </div>
-        </div>
-        <div class="editor-body">
-            <div id="input-editor" class="editor-wrapper"></div>
-            <div class="tostring-section">
-                <div class="tostring-label">RequestDto.toString()</div>
-                <div id="requestToString" class="tostring-content placeholder">// DTO to JSON または Send を実行してください</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- レスポンス -->
-    <div class="editor-panel">
-        <div class="editor-tab">
-            <div class="tab-file">
-                <span class="file-dot">&#9679;</span>
-                <span>response.json</span>
-            </div>
-            <div class="tab-meta">
-                <span id="respHttpStatus" class="meta-tag"></span>
-                <span id="respTime"       class="meta-tag c-info"></span>
-            </div>
-        </div>
-        <div class="editor-body">
-            <div id="output-editor" class="editor-wrapper"></div>
-            <div class="tostring-section">
-                <div class="tostring-label">ResponseDto.toString()</div>
-                <div id="responseToString" class="tostring-content placeholder">// Send を実行してください</div>
-            </div>
-        </div>
-    </div>
-
+<div class="editors-area" id="editorsArea">
+    <!-- 動的に生成される -->
 </div>
 
 <!-- ─── ステータスバー ──────────────────────────── -->
@@ -334,30 +534,362 @@
 <!-- ─── Monaco Editor (CDN) ────────────────────── -->
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
 <script>
-    let inputEditor, outputEditor;
+    /* ── グローバル状態 ─────────────────────────── */
+    let monacoReady = false;
+    let allDtoList = [];              // 全DTO名リスト
+    let tabCounter = 0;               // タブ連番
+    let tabs = [];                    // { id, number, dtoName, inputEditor, outputEditor, logs }
+    let activeTabId = null;
 
-    /* Monaco 初期化 */
+    /* ── テーマ切替 ─────────────────────────────── */
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = !body.classList.contains('light-theme');
+        body.classList.toggle('light-theme', isDark);
+        document.getElementById('themeIcon').innerHTML = isDark ? '&#9728;' : '&#9790;';
+        document.getElementById('themeLabel').textContent = isDark ? 'Light' : 'Dark';
+
+        // Monaco テーマ変更
+        if (monacoReady) {
+            const theme = isDark ? 'vs' : 'vs-dark';
+            monaco.editor.setTheme(theme);
+        }
+
+        localStorage.setItem('ejb-theme', isDark ? 'light' : 'dark');
+    }
+
+    function applyStoredTheme() {
+        const stored = localStorage.getItem('ejb-theme');
+        if (stored === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeIcon').innerHTML = '&#9728;';
+            document.getElementById('themeLabel').textContent = 'Light';
+        }
+    }
+    applyStoredTheme();
+
+    /* ── DTO 一覧取得 & フィルタ ──────────────── */
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res  = await fetch('/api/dto/list');
+            allDtoList = await res.json();
+            populateDtoSelect(allDtoList);
+        } catch (e) {
+            document.getElementById('dtoSelect').innerHTML =
+                '<option value="">（取得エラー）</option>';
+        }
+    });
+
+    function populateDtoSelect(list) {
+        const sel = document.getElementById('dtoSelect');
+        sel.innerHTML = '';
+        if (list.length === 0) {
+            sel.innerHTML = '<option value="">（該当なし）</option>';
+        } else {
+            list.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    function filterDtoList() {
+        const q = document.getElementById('dtoSearch').value.toLowerCase();
+        const filtered = allDtoList.filter(n => n.toLowerCase().includes(q));
+        populateDtoSelect(filtered);
+    }
+
+    /* ── 行番号付きテキスト生成 ──────────────── */
+    function renderLinedText(text, cssClass) {
+        if (!text || text.trim() === '') {
+            return `<div class="lined-content ${cssClass || ''}">
+                <table><tr class="placeholder-row">
+                    <td class="line-num">1</td>
+                    <td class="line-text">// (empty)</td>
+                </tr></table></div>`;
+        }
+        const lines = text.split('\n');
+        const rows = lines.map((line, i) =>
+            `<tr><td class="line-num">${i + 1}</td><td class="line-text">${escapeHtml(line)}</td></tr>`
+        ).join('');
+        return `<div class="lined-content ${cssClass || ''}"><table>${rows}</table></div>`;
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ── タブ管理 ────────────────────────────── */
+    function addNewTab(dtoName) {
+        tabCounter++;
+        const id = 'tab-' + tabCounter;
+        const tab = {
+            id,
+            number: tabCounter,
+            dtoName: dtoName || 'New',
+            inputEditor: null,
+            outputEditor: null,
+            logs: [],
+            reqSubTab: 'json',
+            resSubTab: 'json'
+        };
+        tabs.push(tab);
+        renderTabs();
+        switchTab(id);
+        return tab;
+    }
+
+    function removeTab(id, event) {
+        if (event) event.stopPropagation();
+        if (tabs.length <= 1) return; // 最低1タブは残す
+
+        const idx = tabs.findIndex(t => t.id === id);
+        const tab = tabs[idx];
+
+        // エディター破棄
+        if (tab.inputEditor) tab.inputEditor.dispose();
+        if (tab.outputEditor) tab.outputEditor.dispose();
+
+        tabs.splice(idx, 1);
+
+        if (activeTabId === id) {
+            const newIdx = Math.min(idx, tabs.length - 1);
+            activeTabId = null;
+            renderTabs();
+            switchTab(tabs[newIdx].id);
+        } else {
+            renderTabs();
+        }
+    }
+
+    function renderTabs() {
+        const bar = document.getElementById('requestTabsBar');
+        const addBtn = bar.querySelector('.add-tab-btn');
+
+        // 既存タブ要素を削除
+        bar.querySelectorAll('.req-tab').forEach(el => el.remove());
+
+        // タブ要素を生成
+        tabs.forEach(tab => {
+            const el = document.createElement('div');
+            el.className = 'req-tab' + (tab.id === activeTabId ? ' active' : '');
+            el.onclick = () => switchTab(tab.id);
+
+            const title = `#${tab.number} ${tab.dtoName}`;
+            el.innerHTML = `
+                <span>${escapeHtml(title)}</span>
+                ${tabs.length > 1
+                    ? `<span class="tab-close" onclick="removeTab('${tab.id}', event)" title="閉じる">&times;</span>`
+                    : ''}
+            `;
+            bar.insertBefore(el, addBtn);
+        });
+    }
+
+    function switchTab(id) {
+        if (activeTabId === id) return;
+
+        // 既存エディターのDOM要素を非表示
+        const area = document.getElementById('editorsArea');
+
+        // 全タブコンテンツを非表示
+        area.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+
+        activeTabId = id;
+        renderTabs();
+
+        const tab = tabs.find(t => t.id === id);
+        let contentEl = document.getElementById('content-' + id);
+
+        if (!contentEl) {
+            // 初回: コンテンツ生成
+            contentEl = createTabContent(tab);
+            area.appendChild(contentEl);
+
+            // Monaco エディター生成
+            if (monacoReady) {
+                initTabEditors(tab);
+            }
+        }
+
+        contentEl.style.display = 'flex';
+    }
+
+    function createTabContent(tab) {
+        const div = document.createElement('div');
+        div.id = 'content-' + tab.id;
+        div.className = 'tab-content';
+        div.style.display = 'flex';
+        div.style.flex = '1';
+        div.style.overflow = 'hidden';
+
+        div.innerHTML = `
+            <!-- Request パネル -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span>&#9654; Request</span>
+                </div>
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-side="req" data-sub="json"
+                         onclick="switchSubTab('${tab.id}', 'req', 'json')">
+                        JSON
+                        <span class="meta-tag" id="reqLines-${tab.id}"></span>
+                        <span class="meta-tag" id="reqBytes-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="req" data-sub="tostring"
+                         onclick="switchSubTab('${tab.id}', 'req', 'tostring')">
+                        toString
+                        <span class="meta-tag" id="reqTsLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="req" data-sub="log"
+                         onclick="switchSubTab('${tab.id}', 'req', 'log')">
+                        Log
+                        <span class="meta-tag" id="reqLogCount-${tab.id}"></span>
+                    </div>
+                </div>
+                <div class="editor-body">
+                    <div class="sub-content active" id="reqJson-${tab.id}">
+                        <div id="reqEditor-${tab.id}" class="editor-wrapper"></div>
+                    </div>
+                    <div class="sub-content" id="reqTostring-${tab.id}">
+                        <div id="reqTsContent-${tab.id}">
+                            ${renderLinedText('// DTO to JSON または Send を実行してください')}
+                        </div>
+                    </div>
+                    <div class="sub-content" id="reqLog-${tab.id}">
+                        <div id="reqLogContent-${tab.id}">
+                            ${renderLinedText('// ログなし', 'log-content')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response パネル -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span>&#9664; Response</span>
+                    <span style="margin-left:auto; display:flex; gap:12px;">
+                        <span class="meta-tag" id="respHttpStatus-${tab.id}" style="color:var(--c-info)"></span>
+                        <span class="meta-tag" id="respTime-${tab.id}" style="color:var(--c-info)"></span>
+                    </span>
+                </div>
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-side="res" data-sub="json"
+                         onclick="switchSubTab('${tab.id}', 'res', 'json')">
+                        JSON
+                        <span class="meta-tag" id="resLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="res" data-sub="tostring"
+                         onclick="switchSubTab('${tab.id}', 'res', 'tostring')">
+                        toString
+                        <span class="meta-tag" id="resTosLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="res" data-sub="log"
+                         onclick="switchSubTab('${tab.id}', 'res', 'log')">
+                        Log
+                        <span class="meta-tag" id="resLogCount-${tab.id}"></span>
+                    </div>
+                </div>
+                <div class="editor-body">
+                    <div class="sub-content active" id="resJson-${tab.id}">
+                        <div id="resEditor-${tab.id}" class="editor-wrapper"></div>
+                    </div>
+                    <div class="sub-content" id="resTostring-${tab.id}">
+                        <div id="resTosContent-${tab.id}">
+                            ${renderLinedText('// Send を実行してください')}
+                        </div>
+                    </div>
+                    <div class="sub-content" id="resLog-${tab.id}">
+                        <div id="resLogContent-${tab.id}">
+                            ${renderLinedText('// ログなし', 'log-content')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return div;
+    }
+
+    function switchSubTab(tabId, side, sub) {
+        const contentEl = document.getElementById('content-' + tabId);
+        const prefix = side === 'req' ? 'req' : 'res';
+
+        // サブタブのアクティブ切替
+        contentEl.querySelectorAll(`.sub-tab[data-side="${side}"]`).forEach(el => {
+            el.classList.toggle('active', el.dataset.sub === sub);
+        });
+
+        // コンテンツ切替
+        const panels = {
+            json: document.getElementById(`${prefix}Json-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Json-${tabId}`),
+            tostring: document.getElementById(`${prefix}Tostring-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Tostring-${tabId}`),
+            log: document.getElementById(`${prefix}Log-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Log-${tabId}`)
+        };
+
+        Object.entries(panels).forEach(([key, el]) => {
+            if (el) el.classList.toggle('active', key === sub);
+        });
+
+        // Monaco エディターのレイアウト再計算
+        const tab = tabs.find(t => t.id === tabId);
+        if (tab && sub === 'json') {
+            setTimeout(() => {
+                if (side === 'req' && tab.inputEditor) tab.inputEditor.layout();
+                if (side === 'res' && tab.outputEditor) tab.outputEditor.layout();
+            }, 10);
+        }
+
+        // 状態保存
+        if (side === 'req') {
+            tab.reqSubTab = sub;
+        } else {
+            tab.resSubTab = sub;
+        }
+    }
+
+    /* ── Monaco 初期化 ─────────────────────────── */
     require.config({
         paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' }
     });
 
     require(['vs/editor/editor.main'], function () {
+        monacoReady = true;
 
-        const EDITOR_OPTS = {
+        // テーマ設定
+        const isLight = document.body.classList.contains('light-theme');
+        if (isLight) monaco.editor.setTheme('vs');
+
+        // 既存タブにエディター割当
+        tabs.forEach(tab => {
+            if (!tab.inputEditor) initTabEditors(tab);
+        });
+    });
+
+    function getEditorOpts(readOnly) {
+        return {
             language: 'json',
-            theme: 'vs-dark',
+            theme: document.body.classList.contains('light-theme') ? 'vs' : 'vs-dark',
             automaticLayout: true,
             fontSize: 13,
             lineHeight: 20,
             fontFamily: "'Cascadia Code', Consolas, 'Courier New', monospace",
             fontLigatures: true,
-            minimap:  { enabled: false },
+            minimap: { enabled: false },
             scrollBeyondLastLine: false,
             tabSize: 2,
             renderWhitespace: 'boundary',
-            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+            readOnly: !!readOnly,
+            lineNumbers: 'on',
+            formatOnPaste: !readOnly,
+            formatOnType: !readOnly
         };
+    }
 
+    function initTabEditors(tab) {
         const defaultRequest = JSON.stringify({
             operationType: "getCustomer",
             data: {
@@ -366,68 +898,52 @@
             }
         }, null, 2);
 
-        /* ── リクエストエディター (編集可能) */
-        inputEditor = monaco.editor.create(
-            document.getElementById('input-editor'),
-            { ...EDITOR_OPTS, value: defaultRequest, formatOnPaste: true, formatOnType: true }
-        );
+        // Request Editor
+        const reqEl = document.getElementById('reqEditor-' + tab.id);
+        if (reqEl) {
+            tab.inputEditor = monaco.editor.create(reqEl, {
+                ...getEditorOpts(false),
+                value: defaultRequest
+            });
 
-        /* ── レスポンスエディター (読み取り専用) */
-        outputEditor = monaco.editor.create(
-            document.getElementById('output-editor'),
-            {
-                ...EDITOR_OPTS,
-                value: '// Send ボタンを押してください (Ctrl+Enter)',
-                readOnly: true
-            }
-        );
+            // 入力メタ情報更新
+            const updateReqMeta = () => {
+                const v = tab.inputEditor.getValue();
+                const lines = v.split('\n').length;
+                const bytes = new TextEncoder().encode(v).length;
+                const linesEl = document.getElementById('reqLines-' + tab.id);
+                const bytesEl = document.getElementById('reqBytes-' + tab.id);
+                if (linesEl) linesEl.textContent = lines + ' lines';
+                if (bytesEl) bytesEl.textContent = fmtBytes(bytes);
+            };
+            tab.inputEditor.onDidChangeModelContent(updateReqMeta);
+            updateReqMeta();
 
-        /* 入力サイズ表示 */
-        const updateInputMeta = () => {
-            const v = inputEditor.getValue();
-            document.getElementById('inputLines').textContent =
-                v.split('\n').length + ' lines';
-            document.getElementById('inputBytes').textContent =
-                fmtBytes(new TextEncoder().encode(v).length);
-        };
-        inputEditor.onDidChangeModelContent(updateInputMeta);
-        updateInputMeta();
-
-        /* エディター内 Ctrl+Enter ショートカット */
-        inputEditor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-            sendRequest
-        );
-    });
-
-    /* ── ページロード時にDTO一覧を取得 ─────────── */
-    window.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const res  = await fetch('/api/dto/list');
-            const list = await res.json();
-            const sel  = document.getElementById('dtoSelect');
-            sel.innerHTML = '';
-            if (list.length === 0) {
-                sel.innerHTML = '<option value="">（Req DTOなし）</option>';
-            } else {
-                list.forEach(name => {
-                    const opt = document.createElement('option');
-                    opt.value = name;
-                    opt.textContent = name;
-                    sel.appendChild(opt);
-                });
-            }
-        } catch (e) {
-            document.getElementById('dtoSelect').innerHTML =
-                '<option value="">（取得エラー）</option>';
+            // Ctrl+Enter
+            tab.inputEditor.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                () => sendRequestFromActiveTab()
+            );
         }
-    });
 
-    /* ── DTO → JSON ─────────────────────────────── */
-    async function loadDtoSchema() {
+        // Response Editor
+        const resEl = document.getElementById('resEditor-' + tab.id);
+        if (resEl) {
+            tab.outputEditor = monaco.editor.create(resEl, {
+                ...getEditorOpts(true),
+                value: '// Send ボタンを押してください (Ctrl+Enter)'
+            });
+        }
+    }
+
+    /* ── DTO → JSON (アクティブタブに適用) ────── */
+    async function loadDtoSchemaToActiveTab() {
         const sel = document.getElementById('dtoSelect');
         const className = sel.value;
         if (!className) return;
+
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
 
         const btn = document.getElementById('schemaBtn');
         btn.disabled = true;
@@ -438,47 +954,71 @@
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
 
-            inputEditor.setValue(JSON.stringify(data.json, null, 2));
+            if (tab.inputEditor) {
+                tab.inputEditor.setValue(JSON.stringify(data.json, null, 2));
+            }
 
-            const reqTs = document.getElementById('requestToString');
-            reqTs.textContent = data.toStringValue || '';
-            reqTs.classList.remove('placeholder');
+            // toString 更新
+            const tsContent = document.getElementById('reqTsContent-' + tab.id);
+            if (tsContent) {
+                tsContent.innerHTML = renderLinedText(data.toStringValue || '');
+                updateSubTabMeta(tab.id, 'req', 'tostring', data.toStringValue || '');
+            }
+
+            // タブ名更新
+            tab.dtoName = className;
+            renderTabs();
+
+            // ログ追加
+            addLog(tab, 'req', `[DTO to JSON] ${className} loaded`);
 
             setStatus('', className + ' のスキーマを表示しました');
         } catch (e) {
+            addLog(tab, 'req', `[ERROR] DTOロードエラー: ${e.message}`);
             setStatus('error', 'DTOロードエラー: ' + e.message);
         } finally {
             btn.disabled = false;
         }
     }
 
-    /* ── Send Request ────────────────────────────── */
-    async function sendRequest() {
+    /* ── Send Request (アクティブタブ) ─────────── */
+    async function sendRequestFromActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab || !tab.inputEditor) return;
+
         const btn            = document.getElementById('requestBtn');
-        const respHttpStatus = document.getElementById('respHttpStatus');
-        const respTime       = document.getElementById('respTime');
+        const respHttpStatus = document.getElementById('respHttpStatus-' + tab.id);
+        const respTime       = document.getElementById('respTime-' + tab.id);
 
         /* JSON バリデーション */
         let body;
         try {
-            body = JSON.parse(inputEditor.getValue());
+            body = JSON.parse(tab.inputEditor.getValue());
         } catch (e) {
             setStatus('error', 'JSON Parse Error: ' + e.message);
-            outputEditor.setValue(JSON.stringify({
-                error:   'Invalid JSON',
-                message: e.message
-            }, null, 2));
-            respHttpStatus.textContent = 'JSON Error';
-            respHttpStatus.className   = 'meta-tag c-err';
-            respTime.textContent       = '';
+            if (tab.outputEditor) {
+                tab.outputEditor.setValue(JSON.stringify({
+                    error:   'Invalid JSON',
+                    message: e.message
+                }, null, 2));
+            }
+            if (respHttpStatus) {
+                respHttpStatus.textContent = 'JSON Error';
+                respHttpStatus.style.color = 'var(--c-err)';
+            }
+            if (respTime) respTime.textContent = '';
+            addLog(tab, 'req', `[ERROR] JSON Parse Error: ${e.message}`);
             return;
         }
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span><span>Sending…</span>';
         setStatus('loading', 'EJB サービスを呼び出し中…');
-        respHttpStatus.textContent = '';
-        respTime.textContent       = '';
+        if (respHttpStatus) respHttpStatus.textContent = '';
+        if (respTime) respTime.textContent = '';
+
+        addLog(tab, 'req', `[SEND] POST /api/process`);
+        addLog(tab, 'req', `[SEND] Body: ${JSON.stringify(body).substring(0, 200)}`);
 
         const t0 = performance.now();
 
@@ -496,46 +1036,145 @@
 
             /* レスポンスJSON表示 */
             if (parsed && parsed.responseJson !== undefined) {
-                outputEditor.setValue(JSON.stringify(parsed.responseJson, null, 2));
+                const resJson = JSON.stringify(parsed.responseJson, null, 2);
+                if (tab.outputEditor) tab.outputEditor.setValue(resJson);
+
+                // Response JSON lines 更新
+                const resLinesEl = document.getElementById('resLines-' + tab.id);
+                if (resLinesEl) resLinesEl.textContent = resJson.split('\n').length + ' lines';
 
                 /* RequestDto toString */
-                const reqTs = document.getElementById('requestToString');
-                reqTs.textContent = parsed.requestToString || '';
-                reqTs.classList.remove('placeholder');
+                const reqTsContent = document.getElementById('reqTsContent-' + tab.id);
+                if (reqTsContent) {
+                    reqTsContent.innerHTML = renderLinedText(parsed.requestToString || '');
+                    updateSubTabMeta(tab.id, 'req', 'tostring', parsed.requestToString || '');
+                }
 
                 /* ResponseDto toString */
-                const resTs = document.getElementById('responseToString');
-                resTs.textContent = parsed.responseToString || '';
-                resTs.classList.remove('placeholder');
+                const resTosContent = document.getElementById('resTosContent-' + tab.id);
+                if (resTosContent) {
+                    resTosContent.innerHTML = renderLinedText(parsed.responseToString || '');
+                    updateSubTabMeta(tab.id, 'res', 'tostring', parsed.responseToString || '');
+                }
             } else {
-                outputEditor.setValue(parsed ? JSON.stringify(parsed, null, 2) : text);
+                const fallback = parsed ? JSON.stringify(parsed, null, 2) : text;
+                if (tab.outputEditor) tab.outputEditor.setValue(fallback);
             }
 
-            respTime.textContent = elapsed + ' ms';
+            if (respTime) respTime.textContent = elapsed + ' ms';
 
             if (res.ok) {
                 setStatus('success', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
-                respHttpStatus.textContent = 'HTTP ' + res.status;
-                respHttpStatus.className   = 'meta-tag c-ok';
+                if (respHttpStatus) {
+                    respHttpStatus.textContent = 'HTTP ' + res.status;
+                    respHttpStatus.style.color = 'var(--c-ok)';
+                }
+                addLog(tab, 'res', `[RESPONSE] HTTP ${res.status} ${res.statusText} — ${elapsed} ms`);
             } else {
                 setStatus('error', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
-                respHttpStatus.textContent = 'HTTP ' + res.status;
-                respHttpStatus.className   = 'meta-tag c-err';
+                if (respHttpStatus) {
+                    respHttpStatus.textContent = 'HTTP ' + res.status;
+                    respHttpStatus.style.color = 'var(--c-err)';
+                }
+                addLog(tab, 'res', `[ERROR] HTTP ${res.status} ${res.statusText} — ${elapsed} ms`);
             }
 
         } catch (e) {
             const elapsed = Math.round(performance.now() - t0);
             setStatus('error', 'Network Error: ' + e.message);
-            outputEditor.setValue(JSON.stringify({ error: 'Network Error', message: e.message }, null, 2));
-            respHttpStatus.textContent = 'Error';
-            respHttpStatus.className   = 'meta-tag c-err';
-            respTime.textContent       = elapsed + ' ms';
+            if (tab.outputEditor) {
+                tab.outputEditor.setValue(JSON.stringify({ error: 'Network Error', message: e.message }, null, 2));
+            }
+            if (respHttpStatus) {
+                respHttpStatus.textContent = 'Error';
+                respHttpStatus.style.color = 'var(--c-err)';
+            }
+            if (respTime) respTime.textContent = elapsed + ' ms';
+            addLog(tab, 'res', `[ERROR] Network Error: ${e.message} — ${elapsed} ms`);
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<span>&#9654;</span><span>Send</span>';
         }
     }
 
+    /* ── ログ管理 ─────────────────────────────── */
+    function addLog(tab, side, message) {
+        const now = new Date();
+        const ts = now.toLocaleTimeString('ja-JP', { hour12: false }) +
+                   '.' + String(now.getMilliseconds()).padStart(3, '0');
+        const entry = `[${ts}] ${message}`;
+
+        if (!tab._logs) tab._logs = { req: [], res: [] };
+        tab._logs[side].push(entry);
+
+        // ログ表示更新
+        const logContent = document.getElementById(`${side === 'req' ? 'req' : 'res'}LogContent-${tab.id}`);
+        if (logContent) {
+            const allLogs = tab._logs[side].join('\n');
+            logContent.innerHTML = renderLinedText(allLogs, 'log-content');
+        }
+
+        // ログ件数更新
+        const countEl = document.getElementById(`${side === 'req' ? 'req' : 'res'}LogCount-${tab.id}`);
+        if (countEl) countEl.textContent = tab._logs[side].length + ' entries';
+    }
+
+    /* ── サブタブメタ情報更新 ─────────────────── */
+    function updateSubTabMeta(tabId, side, sub, text) {
+        if (sub === 'tostring') {
+            const lines = text ? text.split('\n').length : 0;
+            const elId = side === 'req' ? `reqTsLines-${tabId}` : `resTosLines-${tabId}`;
+            const el = document.getElementById(elId);
+            if (el) el.textContent = lines + ' lines';
+        }
+    }
+
+    /* ── クリア ───────────────────────────────── */
+    function clearActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+
+        // Request エディターをデフォルトに戻す
+        if (tab.inputEditor) {
+            tab.inputEditor.setValue(JSON.stringify({
+                operationType: "getCustomer",
+                data: {
+                    customerId:    "C001",
+                    includeOrders: true
+                }
+            }, null, 2));
+        }
+
+        // Response エディターをクリア
+        if (tab.outputEditor) {
+            tab.outputEditor.setValue('// Send ボタンを押してください (Ctrl+Enter)');
+        }
+
+        // toString クリア
+        const reqTs = document.getElementById('reqTsContent-' + tab.id);
+        if (reqTs) reqTs.innerHTML = renderLinedText('// DTO to JSON または Send を実行してください');
+
+        const resTs = document.getElementById('resTosContent-' + tab.id);
+        if (resTs) resTs.innerHTML = renderLinedText('// Send を実行してください');
+
+        // ログクリア
+        if (tab._logs) tab._logs = { req: [], res: [] };
+        const reqLog = document.getElementById('reqLogContent-' + tab.id);
+        if (reqLog) reqLog.innerHTML = renderLinedText('// ログなし', 'log-content');
+        const resLog = document.getElementById('resLogContent-' + tab.id);
+        if (resLog) resLog.innerHTML = renderLinedText('// ログなし', 'log-content');
+
+        // メタ情報リセット
+        ['reqLines', 'reqBytes', 'resLines', 'reqTsLines', 'resTosLines',
+         'reqLogCount', 'resLogCount', 'respHttpStatus', 'respTime'].forEach(key => {
+            const el = document.getElementById(key + '-' + tab.id);
+            if (el) el.textContent = '';
+        });
+
+        setStatus('', 'クリアしました');
+    }
+
+    /* ── ユーティリティ ───────────────────────── */
     function setStatus(type, msg) {
         const bar = document.getElementById('statusBar');
         bar.className = 'status-bar';
@@ -554,9 +1193,12 @@
     document.addEventListener('keydown', e => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
-            sendRequest();
+            sendRequestFromActiveTab();
         }
     });
+
+    /* ── 初期タブ作成 ────────────────────────── */
+    addNewTab('Default');
 </script>
 </body>
 </html>
