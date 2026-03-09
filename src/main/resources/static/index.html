@@ -145,13 +145,21 @@
         /* ── ツールバー ───────────────────────── */
         .toolbar {
             background: var(--bg-secondary);
-            padding: 7px 12px;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
             border-bottom: 1px solid var(--border-secondary);
             flex-wrap: wrap;
+        }
+        /* 行区切り: 幅100%の不可視divでflexを折り返す */
+        .toolbar-break {
+            flex-basis: 100%;
+            height: 1px;
+            background: var(--border-secondary);
+            margin: 2px -12px;
+            padding: 0 12px;
         }
         .toolbar-label {
             font-size: 11px;
@@ -659,10 +667,11 @@
 
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
-    <span class="toolbar-label">DTO:</span>
+    <!-- ── 行1: API操作 ── -->
+    <span class="toolbar-label">API:</span>
 
     <input id="dtoSearch" class="dto-search" type="text"
-           placeholder="&#x1F50D; 検索..." oninput="filterDtoList()">
+           placeholder="&#x1F50D; DTO検索..." oninput="filterDtoList()">
 
     <select id="dtoSelect" class="dto-select">
         <option value="">-- loading... --</option>
@@ -689,7 +698,11 @@
         <span>Clear</span>
     </button>
 
-    <div class="toolbar-sep"></div>
+    <!-- ── 行区切り ── -->
+    <div class="toolbar-break"></div>
+
+    <!-- ── 行2: 記録・抽出 ── -->
+    <span class="toolbar-label">記録:</span>
 
     <input type="text" id="evidenceTitle" class="evidence-title-input" value="テストエビデンス" placeholder="エビデンスタイトル" title="エビデンスのタイトル">
     <input type="text" id="evidenceComment" class="evidence-comment-input" placeholder="全体コメント（任意）" title="エビデンス全体コメント（入力時のみ出力）">
