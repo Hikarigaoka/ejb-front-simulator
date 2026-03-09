@@ -916,7 +916,7 @@
         .jndi-profile-row .jndi-btn.del:hover { background: var(--btn-danger-bg); color: var(--btn-danger-fg); }
         .jndi-fields-col {
             display: grid;
-            grid-template-columns: max-content 1fr;
+            grid-template-columns: max-content minmax(0, 1fr);
             gap: 3px 8px;
             align-items: center;
         }
@@ -934,7 +934,11 @@
             border: 1px solid var(--border-input);
             border-radius: 3px;
             box-sizing: border-box;
+            min-width: 0;
             width: 100%;
+        }
+        .jndi-fields-col input:focus {
+            outline: 1px solid var(--accent);
         }
 
         /* ── HTTP URL バー ──────────────────────── */
