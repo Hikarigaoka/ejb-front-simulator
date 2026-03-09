@@ -367,6 +367,78 @@
         }
         .evidence-comment-input:focus { border-color: var(--accent); }
 
+        /* ── 抽出リスト ─────────────────────────── */
+        .btn-extract-toggle { background: #3a3a5c; border-color: #5b5b9a; color: #b0b0ff; }
+        .btn-extract-toggle:hover { background: #4a4a7a; }
+        .light-theme .btn-extract-toggle { background: #e8e8ff; border-color: #8888cc; color: #4444aa; }
+        .light-theme .btn-extract-toggle:hover { background: #d0d0ff; }
+        .extraction-arrow { font-size: 10px; margin-left: 2px; transition: transform 0.2s; display: inline-block; }
+        .extraction-arrow.open { transform: rotate(180deg); }
+
+        .extraction-panel {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 6px 12px 8px;
+            flex-shrink: 0;
+        }
+        .extraction-inner { display: flex; flex-direction: column; gap: 6px; }
+        .extraction-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+        .extraction-table thead th {
+            text-align: left;
+            padding: 3px 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: normal;
+            border-bottom: 1px solid var(--border);
+        }
+        .ex-th-key { width: 200px; }
+        .ex-th-val { }
+        .ex-th-act { width: 110px; }
+        .extraction-table tbody tr:hover { background: rgba(128,128,255,0.05); }
+        .ex-td { padding: 3px 4px; vertical-align: middle; }
+        .ex-input-key, .ex-input-val {
+            width: 100%;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 12px;
+            font-family: 'Cascadia Code', Consolas, monospace;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .ex-input-key { width: 192px; }
+        .ex-input-key:focus, .ex-input-val:focus { border-color: var(--accent); }
+        .ex-input-val { background: var(--bg-input); color: var(--c-info); }
+        .ex-actions { display: flex; gap: 4px; align-items: center; }
+        .btn-ex-extract {
+            padding: 3px 10px; font-size: 11px;
+            background: #1e5a2a; border: 1px solid #2e7a3a; color: #7fffaf;
+            border-radius: 3px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-ex-extract:hover { background: #2a7a38; }
+        .light-theme .btn-ex-extract { background: #d4f0dc; border-color: #5aaa6a; color: #1a6a2a; }
+        .light-theme .btn-ex-extract:hover { background: #bce8ca; }
+        .btn-ex-del {
+            padding: 3px 7px; font-size: 12px;
+            background: transparent; border: 1px solid transparent;
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer;
+        }
+        .btn-ex-del:hover { background: rgba(255,50,50,0.15); color: var(--c-err); border-color: var(--c-err); }
+        .extraction-footer { display: flex; align-items: center; gap: 12px; margin-top: 2px; }
+        .btn-ex-add {
+            padding: 3px 12px; font-size: 12px;
+            background: transparent; border: 1px solid var(--border-input);
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer;
+        }
+        .btn-ex-add:hover { border-color: var(--accent); color: var(--text-primary); }
+        .extraction-hint { font-size: 11px; color: var(--text-secondary); opacity: 0.7; }
+
         .req-tab .tab-close {
             font-size: 14px;
             line-height: 1;
@@ -606,6 +678,34 @@
         <span>&#128196;</span>
         <span>エビデンス出力</span>
     </button>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn-extract-toggle" onclick="toggleExtractionPanel()" title="抽出リストを表示/非表示">
+        <span>&#x1F4CB;</span>
+        <span>抽出リスト</span>
+        <span id="extractionToggleArrow" class="extraction-arrow">&#x25BC;</span>
+    </button>
+</div>
+
+<!-- ─── 抽出パネル ──────────────────────────────── -->
+<div id="extractionPanel" class="extraction-panel" style="display:none">
+    <div class="extraction-inner">
+        <table class="extraction-table">
+            <thead>
+                <tr>
+                    <th class="ex-th-key">Key（フィールド名）</th>
+                    <th class="ex-th-val">Value（抽出値）</th>
+                    <th class="ex-th-act"></th>
+                </tr>
+            </thead>
+            <tbody id="extractionRows"></tbody>
+        </table>
+        <div class="extraction-footer">
+            <button class="btn btn-ex-add" onclick="addExtractionRow()">＋ 行追加</button>
+            <span class="extraction-hint">アクティブタブの Request / Response JSON からフィールド値を抽出します</span>
+        </div>
+    </div>
 </div>
 
 <!-- ─── リクエストI/F タブバー ───────────────────── -->
@@ -1401,6 +1501,115 @@
     function saveTabMemo(id, value) {
         const tab = tabs.find(t => t.id === id);
         if (tab) tab.memo = value;
+    }
+
+    /* ── 抽出リスト ───────────────────────────── */
+    let extractionRows = [];   // [{key:'', value:''}]
+    let extractionVisible = false;
+
+    function toggleExtractionPanel() {
+        extractionVisible = !extractionVisible;
+        document.getElementById('extractionPanel').style.display = extractionVisible ? 'block' : 'none';
+        const arrow = document.getElementById('extractionToggleArrow');
+        arrow.classList.toggle('open', extractionVisible);
+        if (extractionVisible && extractionRows.length === 0) {
+            addExtractionRow();
+        }
+    }
+
+    function addExtractionRow(key, value) {
+        extractionRows.push({ key: key || '', value: value || '' });
+        renderExtractionRows();
+    }
+
+    function removeExtractionRow(idx) {
+        extractionRows.splice(idx, 1);
+        renderExtractionRows();
+    }
+
+    function saveExtractionKey(idx, v)   { extractionRows[idx].key   = v; }
+    function saveExtractionValue(idx, v) { extractionRows[idx].value = v; }
+
+    function renderExtractionRows() {
+        const tbody = document.getElementById('extractionRows');
+        tbody.innerHTML = '';
+        extractionRows.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="ex-td">
+                    <input class="ex-input-key" type="text" value="${escHtml(row.key)}"
+                           placeholder="フィールド名（例: event）"
+                           oninput="saveExtractionKey(${idx}, this.value)"
+                           onkeydown="if(event.key==='Enter') extractField(${idx})">
+                </td>
+                <td class="ex-td">
+                    <input class="ex-input-val" type="text" value="${escHtml(row.value)}"
+                           placeholder="（抽出ボタンで自動入力、手動入力も可）"
+                           oninput="saveExtractionValue(${idx}, this.value)">
+                </td>
+                <td class="ex-td">
+                    <div class="ex-actions">
+                        <button class="btn-ex-extract" onclick="extractField(${idx})" title="アクティブタブのJSONから抽出">抽出</button>
+                        <button class="btn-ex-del"     onclick="removeExtractionRow(${idx})" title="削除">&times;</button>
+                    </div>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* JSON から指定キーの値を取り出す（ドット記法対応・配列はカンマ結合） */
+    function extractFromJson(jsonStr, fieldKey) {
+        let obj;
+        try { obj = JSON.parse(jsonStr); } catch { return null; }
+        if (!obj || typeof obj !== 'object') return null;
+
+        // ドット区切りパス解決
+        const parts = fieldKey.split('.');
+        let cur = obj;
+        for (const p of parts) {
+            if (cur === null || cur === undefined) return null;
+            if (Array.isArray(cur)) {
+                // 配列の各要素からキーを取り出す
+                const vals = cur.map(el => (el && typeof el === 'object') ? el[p] : undefined)
+                               .filter(v => v !== undefined);
+                cur = vals.length === 1 ? vals[0] : vals;
+            } else {
+                cur = cur[p];
+            }
+        }
+        if (cur === undefined || cur === null) return null;
+        if (Array.isArray(cur)) return cur.map(v => flattenValue(v)).join(', ');
+        return flattenValue(cur);
+    }
+
+    function flattenValue(v) {
+        if (v === null || v === undefined) return '';
+        if (typeof v === 'object') return JSON.stringify(v);
+        return String(v);
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function extractField(idx) {
+        const row = extractionRows[idx];
+        if (!row || !row.key.trim()) return;
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+
+        const reqJson = tab.inputEditor  ? tab.inputEditor.getValue()  : '';
+        const resJson = tab.outputEditor ? tab.outputEditor.getValue() : '';
+
+        let found = extractFromJson(reqJson, row.key.trim());
+        if (found === null) found = extractFromJson(resJson, row.key.trim());
+
+        if (found !== null) {
+            row.value = found;
+        } else {
+            row.value = '(見つかりません)';
+        }
+        renderExtractionRows();
     }
 
     /* ── テストエビデンス出力 ─────────────────── */
