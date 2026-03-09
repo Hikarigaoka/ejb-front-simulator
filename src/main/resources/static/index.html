@@ -703,7 +703,7 @@
         </table>
         <div class="extraction-footer">
             <button class="btn btn-ex-add" onclick="addExtractionRow()">＋ 行追加</button>
-            <span class="extraction-hint">アクティブタブの Request / Response JSON からフィールド値を抽出します</span>
+            <span class="extraction-hint">例: <code>data.customerId</code>（パス指定）&nbsp;／&nbsp;<code>..customerId</code>（全階層を再帰検索）</span>
         </div>
     </div>
 </div>
@@ -1557,11 +1557,22 @@
         });
     }
 
-    /* JSON から指定キーの値を取り出す（ドット記法対応・配列はカンマ結合） */
+    /* JSON から指定キーの値を取り出す
+       - 通常:  "data.customerId"  → 指定パスを辿る
+       - 再帰:  "..customerId"     → 全階層を再帰検索して全件返す */
     function extractFromJson(jsonStr, fieldKey) {
         let obj;
         try { obj = JSON.parse(jsonStr); } catch { return null; }
         if (!obj || typeof obj !== 'object') return null;
+
+        // ..key → 再帰検索モード
+        if (fieldKey.startsWith('..')) {
+            const key = fieldKey.slice(2);
+            const results = [];
+            collectDeep(obj, key, results);
+            if (results.length === 0) return null;
+            return results.map(flattenValue).join(', ');
+        }
 
         // ドット区切りパス解決
         const parts = fieldKey.split('.');
@@ -1569,7 +1580,6 @@
         for (const p of parts) {
             if (cur === null || cur === undefined) return null;
             if (Array.isArray(cur)) {
-                // 配列の各要素からキーを取り出す
                 const vals = cur.map(el => (el && typeof el === 'object') ? el[p] : undefined)
                                .filter(v => v !== undefined);
                 cur = vals.length === 1 ? vals[0] : vals;
@@ -1578,8 +1588,24 @@
             }
         }
         if (cur === undefined || cur === null) return null;
-        if (Array.isArray(cur)) return cur.map(v => flattenValue(v)).join(', ');
+        if (Array.isArray(cur)) return cur.map(flattenValue).join(', ');
         return flattenValue(cur);
+    }
+
+    /* 再帰的に全階層からキーを収集 */
+    function collectDeep(node, key, results) {
+        if (Array.isArray(node)) {
+            node.forEach(el => collectDeep(el, key, results));
+        } else if (node && typeof node === 'object') {
+            if (Object.prototype.hasOwnProperty.call(node, key)) {
+                const v = node[key];
+                if (Array.isArray(v)) v.forEach(el => results.push(el));
+                else results.push(v);
+            }
+            Object.values(node).forEach(v => {
+                if (v && typeof v === 'object') collectDeep(v, key, results);
+            });
+        }
     }
 
     function flattenValue(v) {
