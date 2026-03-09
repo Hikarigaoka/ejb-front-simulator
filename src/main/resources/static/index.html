@@ -395,9 +395,10 @@
             font-weight: normal;
             border-bottom: 1px solid var(--border);
         }
+        .ex-th-src { width: 100px; }
         .ex-th-key { width: 200px; }
         .ex-th-val { }
-        .ex-th-act { width: 110px; }
+        .ex-th-act { width: 130px; }
         .extraction-table tbody tr:hover { background: rgba(128,128,255,0.05); }
         .ex-td { padding: 3px 4px; vertical-align: middle; }
         .ex-input-key, .ex-input-val {
@@ -412,6 +413,18 @@
             outline: none;
             box-sizing: border-box;
         }
+        .ex-select-src {
+            width: 92px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 4px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+        .ex-select-src:focus { border-color: var(--accent); }
         .ex-input-key { width: 192px; }
         .ex-input-key:focus, .ex-input-val:focus { border-color: var(--accent); }
         .ex-input-val { background: var(--bg-input); color: var(--c-info); }
@@ -424,6 +437,12 @@
         .btn-ex-extract:hover { background: #2a7a38; }
         .light-theme .btn-ex-extract { background: #d4f0dc; border-color: #5aaa6a; color: #1a6a2a; }
         .light-theme .btn-ex-extract:hover { background: #bce8ca; }
+        .btn-ex-clr {
+            padding: 3px 7px; font-size: 11px;
+            background: transparent; border: 1px solid var(--border-input);
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-ex-clr:hover { border-color: var(--accent); color: var(--text-primary); }
         .btn-ex-del {
             padding: 3px 7px; font-size: 12px;
             background: transparent; border: 1px solid transparent;
@@ -694,8 +713,9 @@
         <table class="extraction-table">
             <thead>
                 <tr>
+                    <th class="ex-th-src">Source</th>
                     <th class="ex-th-key">Key（フィールド名）</th>
-                    <th class="ex-th-val">Value（抽出値）</th>
+                    <th class="ex-th-val">Value（抽出値・追記）</th>
                     <th class="ex-th-act"></th>
                 </tr>
             </thead>
@@ -1504,7 +1524,7 @@
     }
 
     /* ── 抽出リスト ───────────────────────────── */
-    let extractionRows = [];   // [{key:'', value:''}]
+    let extractionRows = [];   // [{source:'all', key:'', value:''}]
     let extractionVisible = false;
 
     function toggleExtractionPanel() {
@@ -1517,8 +1537,8 @@
         }
     }
 
-    function addExtractionRow(key, value) {
-        extractionRows.push({ key: key || '', value: value || '' });
+    function addExtractionRow(source, key, value) {
+        extractionRows.push({ source: source || 'all', key: key || '', value: value || '' });
         renderExtractionRows();
     }
 
@@ -1527,30 +1547,43 @@
         renderExtractionRows();
     }
 
-    function saveExtractionKey(idx, v)   { extractionRows[idx].key   = v; }
-    function saveExtractionValue(idx, v) { extractionRows[idx].value = v; }
+    function clearExtractionValue(idx) {
+        extractionRows[idx].value = '';
+        renderExtractionRows();
+    }
+
+    function saveExtractionSource(idx, v) { extractionRows[idx].source = v; }
+    function saveExtractionKey(idx, v)    { extractionRows[idx].key    = v; }
+    function saveExtractionValue(idx, v)  { extractionRows[idx].value  = v; }
 
     function renderExtractionRows() {
         const tbody = document.getElementById('extractionRows');
         tbody.innerHTML = '';
         extractionRows.forEach((row, idx) => {
             const tr = document.createElement('tr');
+            const srcOpts = ['all', 'request', 'response'].map(s =>
+                `<option value="${s}" ${row.source === s ? 'selected' : ''}>${s}</option>`
+            ).join('');
             tr.innerHTML = `
                 <td class="ex-td">
+                    <select class="ex-select-src" onchange="saveExtractionSource(${idx}, this.value)">${srcOpts}</select>
+                </td>
+                <td class="ex-td">
                     <input class="ex-input-key" type="text" value="${escHtml(row.key)}"
-                           placeholder="フィールド名（例: event）"
+                           placeholder="フィールド名（例: data.customerId）"
                            oninput="saveExtractionKey(${idx}, this.value)"
                            onkeydown="if(event.key==='Enter') extractField(${idx})">
                 </td>
                 <td class="ex-td">
                     <input class="ex-input-val" type="text" value="${escHtml(row.value)}"
-                           placeholder="（抽出ボタンで自動入力、手動入力も可）"
+                           placeholder="（抽出で追記、手動入力も可）"
                            oninput="saveExtractionValue(${idx}, this.value)">
                 </td>
                 <td class="ex-td">
                     <div class="ex-actions">
-                        <button class="btn-ex-extract" onclick="extractField(${idx})" title="アクティブタブのJSONから抽出">抽出</button>
-                        <button class="btn-ex-del"     onclick="removeExtractionRow(${idx})" title="削除">&times;</button>
+                        <button class="btn-ex-extract" onclick="extractField(${idx})" title="アクティブタブのJSONから抽出・追記">抽出</button>
+                        <button class="btn-ex-clr"     onclick="clearExtractionValue(${idx})" title="Valueをクリア">CLR</button>
+                        <button class="btn-ex-del"     onclick="removeExtractionRow(${idx})" title="行削除">&times;</button>
                     </div>
                 </td>`;
             tbody.appendChild(tr);
@@ -1626,15 +1659,30 @@
 
         const reqJson = tab.inputEditor  ? tab.inputEditor.getValue()  : '';
         const resJson = tab.outputEditor ? tab.outputEditor.getValue() : '';
+        const key     = row.key.trim();
 
-        let found = extractFromJson(reqJson, row.key.trim());
-        if (found === null) found = extractFromJson(resJson, row.key.trim());
-
-        if (found !== null) {
-            row.value = found;
+        // Source 設定に従って検索
+        let found = null;
+        if (row.source === 'request') {
+            found = extractFromJson(reqJson, key);
+        } else if (row.source === 'response') {
+            found = extractFromJson(resJson, key);
         } else {
-            row.value = '(見つかりません)';
+            // all: request → response の順で試みる
+            found = extractFromJson(reqJson, key);
+            if (found === null) found = extractFromJson(resJson, key);
         }
+
+        if (found === null) return;  // 見つからなければ Value は変えない
+
+        // 既存値に重複なし追記（カンマ区切り）
+        const newVals  = found.split(',').map(s => s.trim()).filter(Boolean);
+        const existing = row.value ? row.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const merged   = [...existing];
+        for (const v of newVals) {
+            if (!merged.includes(v)) merged.push(v);
+        }
+        row.value = merged.join(', ');
         renderExtractionRows();
     }
 
