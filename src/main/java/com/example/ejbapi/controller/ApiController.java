@@ -2,7 +2,11 @@ package com.example.ejbapi.controller;
 
 import com.example.ejbapi.dto.ApiRequestDto;
 import com.example.ejbapi.dto.ApiResponseDto;
+import com.example.ejbapi.dto.HttpProxyRequestDto;
+import com.example.ejbapi.dto.ProcessResultDto;
 import com.example.ejbapi.ejb.EjbServiceInterface;
+import com.example.ejbapi.service.HttpProxyService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +19,6 @@ import java.util.Map;
 
 /**
  * REST APIコントローラー
- *
- * <p>ブラウザからのHTTPリクエストを受け取り:
- * <ol>
- *   <li>リクエストJSONを {@link ApiRequestDto} にデシリアライズ</li>
- *   <li>{@link EjbServiceInterface} 経由でEJBを呼び出し</li>
- *   <li>結果 {@link ApiResponseDto} をJSONにシリアライズして返却</li>
- * </ol>
  */
 @Slf4j
 @RestController
@@ -30,30 +27,52 @@ import java.util.Map;
 public class ApiController {
 
     private final EjbServiceInterface ejbService;
+    private final ObjectMapper objectMapper;
+    private final HttpProxyService httpProxyService;
 
-    /**
-     * EJBサービス呼び出しエンドポイント
-     *
-     * <pre>POST /api/process</pre>
-     *
-     * @param request JSONから変換されたリクエストDTO
-     * @return EJBの処理結果DTO
-     */
+    /** EJBサービス呼び出し: POST /api/process */
     @PostMapping("/process")
-    public ResponseEntity<ApiResponseDto> process(@RequestBody ApiRequestDto request) {
+    public ResponseEntity<ProcessResultDto> process(@RequestBody ApiRequestDto request) {
         log.info(">>> POST /api/process  operationType={}", request.getOperationType());
 
         ApiResponseDto response = ejbService.process(request);
 
         log.info("<<< status={} code={}", response.getStatus(), response.getCode());
-        return ResponseEntity.ok(response);
+
+        ProcessResultDto result = ProcessResultDto.builder()
+                .requestJson(objectMapper.valueToTree(request))
+                .requestToString(buildEjbRequestToString(request))
+                .responseJson(objectMapper.valueToTree(response))
+                .responseToString(response.toString())
+                .build();
+
+        return ResponseEntity.ok(result);
     }
 
-    /**
-     * ヘルスチェックエンドポイント
-     *
-     * <pre>GET /api/health</pre>
-     */
+    private String buildEjbRequestToString(ApiRequestDto request) {
+        StringBuilder sb = new StringBuilder();
+        if (request.getJndi() != null && !request.getJndi().isEmpty()) {
+            sb.append("JNDI Properties:\n");
+            request.getJndi().forEach((k, v) -> {
+                String display = k != null && k.contains("credentials") ? "*****" : v;
+                sb.append("  ").append(k).append(" = ").append(display).append('\n');
+            });
+            sb.append('\n');
+        }
+        sb.append("operationType=").append(request.getOperationType()).append('\n');
+        if (request.getData() != null) {
+            sb.append("data=").append(request.getData());
+        }
+        return sb.toString();
+    }
+
+    /** 外部HTTPプロキシ: POST /api/http-proxy */
+    @PostMapping("/http-proxy")
+    public ResponseEntity<ProcessResultDto> httpProxy(@RequestBody HttpProxyRequestDto request) {
+        return httpProxyService.proxy(request);
+    }
+
+    /** ヘルスチェック: GET /api/health */
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> body = new LinkedHashMap<>();

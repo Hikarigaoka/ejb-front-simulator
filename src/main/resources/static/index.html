@@ -5,11 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EJB API Client</title>
     <style>
+        :root {
+            /* ── Dark テーマ (デフォルト) ── */
+            --bg-primary:    #1e1e1e;
+            --bg-secondary:  #252526;
+            --bg-tertiary:   #2d2d2d;
+            --bg-input:      #3c3c3c;
+            --bg-dark:       #1a1a1a;
+            --border-primary:   #252526;
+            --border-secondary: #3c3c3c;
+            --border-input:     #555;
+            --text-primary:   #d4d4d4;
+            --text-secondary: #cccccc;
+            --text-muted:     #858585;
+            --text-string:    #ce9178;
+            --text-keyword:   #9cdcfe;
+            --accent:         #007acc;
+            --accent-hover:   #1177bb;
+            --btn-schema-bg:  #4a3f7a;
+            --btn-schema-fg:  #c5b8f8;
+            --btn-schema-hover: #5a4e8a;
+            --btn-send-bg:    #0e639c;
+            --btn-send-fg:    #ffffff;
+            --btn-send-hover: #1177bb;
+            --btn-danger-bg:  #6e2020;
+            --btn-danger-fg:  #f8b8b8;
+            --btn-danger-hover: #8a2e2e;
+            --status-ok:      #388a34;
+            --status-error:   #c72e0f;
+            --status-loading: #5f5f5f;
+            --c-ok:    #4ec9b0;
+            --c-err:   #f44747;
+            --c-info:  #9cdcfe;
+            --c-warn:  #ce9178;
+            --tab-active-bg:  #1e1e1e;
+            --tab-dot:        #e8c070;
+            --log-bg:         #1a1a1a;
+            --line-num-bg:    #2a2a2a;
+            --line-num-fg:    #5a5a5a;
+            --title-bar-bg:   #323233;
+            --scrollbar-thumb: #424242;
+            --scrollbar-track: transparent;
+        }
+
+        body.light-theme {
+            --bg-primary:    #ffffff;
+            --bg-secondary:  #f3f3f3;
+            --bg-tertiary:   #ececec;
+            --bg-input:      #ffffff;
+            --bg-dark:       #f7f7f7;
+            --border-primary:   #e0e0e0;
+            --border-secondary: #d4d4d4;
+            --border-input:     #c0c0c0;
+            --text-primary:   #1e1e1e;
+            --text-secondary: #333333;
+            --text-muted:     #888888;
+            --text-string:    #a31515;
+            --text-keyword:   #0451a5;
+            --accent:         #007acc;
+            --accent-hover:   #005a9e;
+            --btn-schema-bg:  #e8e0f8;
+            --btn-schema-fg:  #4a3f7a;
+            --btn-schema-hover: #d8cef0;
+            --btn-send-bg:    #007acc;
+            --btn-send-fg:    #ffffff;
+            --btn-send-hover: #005a9e;
+            --btn-danger-bg:  #f8d0d0;
+            --btn-danger-fg:  #a02020;
+            --btn-danger-hover: #f0b0b0;
+            --status-ok:      #388a34;
+            --status-error:   #c72e0f;
+            --status-loading: #aaaaaa;
+            --c-ok:    #267f6e;
+            --c-err:   #c72e0f;
+            --c-info:  #0451a5;
+            --c-warn:  #a31515;
+            --tab-active-bg:  #ffffff;
+            --tab-dot:        #c08000;
+            --log-bg:         #f7f7f7;
+            --line-num-bg:    #f0f0f0;
+            --line-num-fg:    #999999;
+            --title-bar-bg:   #dddddd;
+            --scrollbar-thumb: #c0c0c0;
+            --scrollbar-track: transparent;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #1e1e1e;
-            color: #d4d4d4;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-family: 'Segoe UI', Consolas, 'Helvetica Neue', sans-serif;
             display: flex;
             flex-direction: column;
@@ -17,72 +102,110 @@
             overflow: hidden;
         }
 
+        /* ── スクロールバー ───────────────────── */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
         /* ── タイトルバー ─────────────────────── */
         .title-bar {
-            background: #323233;
+            background: var(--title-bar-bg);
             height: 30px;
             display: flex;
             align-items: center;
             padding: 0 14px;
             gap: 10px;
             font-size: 12px;
-            color: #cccccc;
+            color: var(--text-secondary);
             flex-shrink: 0;
-            border-bottom: 1px solid #252526;
+            border-bottom: 1px solid var(--border-primary);
             user-select: none;
         }
         .title-bar .app-icon { color: #75beff; font-size: 14px; }
         .title-bar .app-name { font-weight: 600; }
-        .title-bar .app-sub  { color: #858585; font-size: 11px; }
+        .title-bar .app-sub  { color: var(--text-muted); font-size: 11px; }
+        .title-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+        /* テーマ切替ボタン */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-input);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .theme-toggle:hover { background: var(--bg-input); }
+        .theme-toggle .theme-label { font-size: 10px; }
 
         /* ── ツールバー ───────────────────────── */
         .toolbar {
-            background: #252526;
-            padding: 7px 12px;
+            background: var(--bg-secondary);
+            padding: 6px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
-            border-bottom: 1px solid #3c3c3c;
+            border-bottom: 1px solid var(--border-secondary);
+            flex-wrap: wrap;
+        }
+        /* 行区切り: 幅100%の不可視divでflexを折り返す */
+        .toolbar-break {
+            flex-basis: 100%;
+            height: 1px;
+            background: var(--border-secondary);
+            margin: 2px -12px;
+            padding: 0 12px;
         }
         .toolbar-label {
             font-size: 11px;
-            color: #858585;
+            color: var(--text-muted);
             white-space: nowrap;
         }
-        .method-select {
-            background: #3c3c3c;
-            border: 1px solid #555;
-            color: #4ec9b0;
+        .toolbar-sep {
+            width: 1px;
+            height: 20px;
+            background: #4a4a4a;
+            flex-shrink: 0;
+            margin: 0 4px;
+        }
+
+        /* DTO検索テキストボックス */
+        .dto-search {
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
             padding: 4px 8px;
             font-size: 12px;
-            font-weight: 700;
+            border-radius: 3px;
+            outline: none;
+            width: 140px;
+            font-family: Consolas, 'Courier New', monospace;
+        }
+        .dto-search:focus { border-color: var(--accent); }
+        .dto-search::placeholder { color: var(--text-muted); }
+
+        .dto-select {
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-keyword);
+            padding: 4px 8px;
+            font-size: 12px;
             border-radius: 3px;
             outline: none;
             cursor: pointer;
-            min-width: 75px;
-        }
-        .method-select:focus { border-color: #007acc; }
-
-        .endpoint-input {
-            background: #3c3c3c;
-            border: 1px solid #555;
-            color: #d4d4d4;
-            padding: 4px 10px;
-            font-size: 12px;
-            border-radius: 3px;
-            outline: none;
-            flex: 1;
+            min-width: 180px;
             font-family: Consolas, 'Courier New', monospace;
-            min-width: 0;
         }
-        .endpoint-input:focus { border-color: #007acc; }
+        .dto-select:focus { border-color: var(--accent); }
 
-        .btn-request {
-            background: #0e639c;
-            color: #ffffff;
+        .btn {
             border: none;
-            padding: 5px 18px;
+            padding: 5px 14px;
             font-size: 12px;
             font-weight: 500;
             border-radius: 3px;
@@ -93,22 +216,431 @@
             gap: 6px;
             flex-shrink: 0;
         }
-        .btn-request:hover:not(:disabled) { background: #1177bb; }
-        .btn-request:disabled {
-            background: #3c3c3c;
-            color: #858585;
+        .btn-schema {
+            background: var(--btn-schema-bg);
+            color: var(--btn-schema-fg);
+        }
+        .btn-schema:hover:not(:disabled) { background: var(--btn-schema-hover); }
+
+        .btn-request {
+            background: var(--btn-send-bg);
+            color: var(--btn-send-fg);
+        }
+        .btn-request:hover:not(:disabled) { background: var(--btn-send-hover); }
+
+        .btn-clear {
+            background: var(--btn-danger-bg);
+            color: var(--btn-danger-fg);
+        }
+        .btn-clear:hover:not(:disabled) { background: var(--btn-danger-hover); }
+
+        .btn-evidence {
+            background: #1a4a2e;
+            color: #7ec89a;
+            border: 1px solid #2a6e42;
+        }
+        .btn-evidence:hover:not(:disabled) { background: #245e3a; }
+        .evidence-title-input {
+            height: 28px;
+            padding: 0 8px;
+            font-size: 12px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid #2a6e42;
+            border-radius: 4px;
+            width: 160px;
+            outline: none;
+        }
+        .evidence-title-input:focus { border-color: var(--accent); }
+
+        .btn-add-tab {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-input);
+        }
+        .btn-add-tab:hover { background: var(--bg-tertiary); }
+
+        .btn:disabled {
+            background: var(--bg-input);
+            color: var(--text-muted);
             cursor: not-allowed;
         }
 
         .kbd-hint {
             font-size: 10px;
-            color: #858585;
+            color: var(--text-muted);
             white-space: nowrap;
-            border: 1px solid #555;
+            border: 1px solid var(--border-input);
             border-radius: 3px;
             padding: 1px 5px;
             font-family: Consolas, monospace;
         }
+
+        /* ── リクエストタブバー ──────────────── */
+        .request-tabs-bar {
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: stretch;
+            height: 32px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-primary);
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .request-tabs-bar::-webkit-scrollbar { height: 3px; }
+
+        .req-tab {
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            border-right: 1px solid var(--border-primary);
+            user-select: none;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .req-tab:hover { color: var(--text-secondary); }
+        .req-tab.active {
+            background: var(--tab-active-bg);
+            color: var(--text-secondary);
+            border-top: 2px solid var(--accent);
+        }
+        .tab-check {
+            accent-color: var(--accent);
+            cursor: pointer;
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+
+        .tab-title { cursor: default; user-select: none; }
+        .tab-rename-input {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--accent);
+            border-radius: 3px;
+            font-size: 12px;
+            padding: 1px 4px;
+            width: 120px;
+            outline: none;
+        }
+        .tab-copy {
+            font-size: 13px;
+            line-height: 1;
+            padding: 1px 3px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        .tab-copy:hover { opacity: 1; color: var(--accent); background: rgba(0,122,204,0.15); }
+        .req-tab.tab-dragging { opacity: 0.4; }
+        .req-tab.tab-drag-over { border-left: 2px solid var(--accent); }
+        .editors-row { display: flex; flex: 1; overflow: hidden; }
+        .tab-memo-bar {
+            flex-shrink: 0;
+            padding: 4px 8px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+        .tab-memo {
+            width: 100%;
+            height: 44px;
+            resize: vertical;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            font-size: 12px;
+            padding: 4px 8px;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .tab-memo:focus { border-color: var(--accent); }
+        .evidence-comment-input {
+            height: 28px;
+            padding: 0 8px;
+            font-size: 12px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid #2a6e42;
+            border-radius: 4px;
+            width: 200px;
+            outline: none;
+        }
+        .evidence-comment-input:focus { border-color: var(--accent); }
+
+        /* ── 抽出リスト ─────────────────────────── */
+        .btn-extract-toggle { background: #3a3a5c; border-color: #5b5b9a; color: #b0b0ff; }
+        .btn-extract-toggle:hover { background: #4a4a7a; }
+        .light-theme .btn-extract-toggle { background: #e8e8ff; border-color: #8888cc; color: #4444aa; }
+        .light-theme .btn-extract-toggle:hover { background: #d0d0ff; }
+        .extraction-arrow { font-size: 10px; margin-left: 2px; transition: transform 0.2s; display: inline-block; }
+        .extraction-arrow.open { transform: rotate(180deg); }
+
+        .extraction-panel {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 6px 12px 8px;
+            flex-shrink: 0;
+        }
+        .extraction-inner { display: flex; flex-direction: column; gap: 6px; }
+        .extraction-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+        .extraction-table thead th {
+            text-align: left;
+            padding: 3px 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: normal;
+            border-bottom: 1px solid var(--border);
+        }
+        .ex-th-src { width: 100px; }
+        .ex-th-key { width: 200px; }
+        .ex-th-val { }
+        .ex-th-act { width: 130px; }
+        .extraction-table tbody tr:hover { background: rgba(128,128,255,0.05); }
+        .ex-td { padding: 3px 4px; vertical-align: middle; }
+        .ex-input-key, .ex-input-val {
+            width: 100%;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 12px;
+            font-family: 'Cascadia Code', Consolas, monospace;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .ex-select-src {
+            width: 92px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 4px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+        .ex-select-src:focus { border-color: var(--accent); }
+        .ex-input-key { width: 192px; }
+        .ex-input-key:focus, .ex-input-val:focus { border-color: var(--accent); }
+        .ex-input-val { background: var(--bg-input); color: var(--c-info); }
+        .ex-actions { display: flex; gap: 4px; align-items: center; }
+        .btn-ex-extract {
+            padding: 3px 10px; font-size: 11px;
+            background: #1e5a2a; border: 1px solid #2e7a3a; color: #7fffaf;
+            border-radius: 3px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-ex-extract:hover { background: #2a7a38; }
+        .light-theme .btn-ex-extract { background: #d4f0dc; border-color: #5aaa6a; color: #1a6a2a; }
+        .light-theme .btn-ex-extract:hover { background: #bce8ca; }
+        .btn-ex-clr {
+            padding: 3px 7px; font-size: 11px;
+            background: transparent; border: 1px solid var(--border-input);
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-ex-clr:hover { border-color: var(--accent); color: var(--text-primary); }
+        .btn-ex-del {
+            padding: 3px 7px; font-size: 12px;
+            background: transparent; border: 1px solid transparent;
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer;
+        }
+        .btn-ex-del:hover { background: rgba(255,50,50,0.15); color: var(--c-err); border-color: var(--c-err); }
+        .extraction-footer { display: flex; align-items: center; gap: 12px; margin-top: 2px; }
+        .btn-ex-add {
+            padding: 3px 12px; font-size: 12px;
+            background: transparent; border: 1px solid var(--border-input);
+            color: var(--text-secondary); border-radius: 3px; cursor: pointer;
+        }
+        .btn-ex-add:hover { border-color: var(--accent); color: var(--text-primary); }
+        .extraction-hint { font-size: 11px; color: var(--text-secondary); opacity: 0.7; }
+
+        /* ── 履歴サイドバー ──────────────────────── */
+        .main-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .history-sidebar {
+            width: 230px;
+            min-width: 230px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.15s, min-width 0.15s;
+            flex-shrink: 0;
+        }
+        .history-sidebar.collapsed { width: 0; min-width: 0; }
+        .hist-header {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-secondary);
+            flex-shrink: 0;
+            gap: 6px;
+        }
+        .hist-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            white-space: nowrap;
+        }
+        .btn-hist-clear-all {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: transparent;
+            border: 1px solid var(--border-input);
+            color: var(--text-muted);
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-hist-clear-all:hover { color: var(--c-err); border-color: var(--c-err); background: rgba(255,50,50,0.1); }
+        .hist-search {
+            margin: 5px 8px;
+            flex-shrink: 0;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 11px;
+            outline: none;
+            width: calc(100% - 16px);
+        }
+        .hist-search:focus { border-color: var(--accent); }
+        .hist-list { flex: 1; overflow-y: auto; }
+        .hist-empty { padding: 16px 10px; font-size: 11px; color: var(--text-muted); text-align: center; }
+        .hist-entry {
+            position: relative;
+            padding: 6px 28px 6px 10px;
+            border-bottom: 1px solid var(--border-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+        .hist-entry:hover { background: var(--bg-tertiary); }
+        .hist-entry-top { display: flex; align-items: center; gap: 5px; margin-bottom: 2px; }
+        .hist-dto {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-keyword);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .hist-badge {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .hist-badge.ok  { background: rgba(78,201,176,0.15); color: var(--c-ok); }
+        .hist-badge.err { background: rgba(244,71,71,0.15);  color: var(--c-err); }
+        .hist-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 2px;
+        }
+        .hist-meta { display: flex; align-items: center; font-size: 10px; color: var(--text-muted); }
+        .hist-time { margin-left: auto; }
+        .btn-hist-del {
+            position: absolute;
+            top: 5px; right: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 3px;
+            line-height: 1;
+            display: none;
+        }
+        .hist-entry:hover .btn-hist-del { display: block; }
+        .btn-hist-del:hover { background: rgba(255,50,50,0.2); color: var(--c-err); }
+        .btn-hist-toggle {
+            background: #2a3a5c; border: 1px solid #4a6a9a; color: #a0c0ff;
+        }
+        .btn-hist-toggle:hover { background: #3a4a7a; }
+        .btn-hist-toggle.active { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .light-theme .btn-hist-toggle { background: #e0ecff; border-color: #6a9acc; color: #1a4a7a; }
+
+        /* ── タブ種別トグル (EJB / HTTP) ──────────── */
+        .type-toggle {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 1px;
+        }
+        .type-btn {
+            padding: 2px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            border: 1px solid var(--border-input);
+            color: var(--text-muted);
+            background: transparent;
+            user-select: none;
+            line-height: 1.6;
+        }
+        .type-btn:first-child { border-radius: 3px 0 0 3px; }
+        .type-btn:last-child  { border-radius: 0 3px 3px 0; border-left: none; }
+        .type-btn:hover { color: var(--text-secondary); background: var(--bg-input); }
+        .type-btn.active.ejb  { background: #2a3a5c; border-color: #4a6a9a; color: #a0c0ff; }
+        .type-btn.active.http { background: #1a4a2a; border-color: #2a8a4a; color: #60e080; }
+        .light-theme .type-btn.active.ejb  { background: #dde8ff; border-color: #6a8acc; color: #1a3a7a; }
+        .light-theme .type-btn.active.http { background: #d0f0d8; border-color: #2a8a4a; color: #0a5a1a; }
+
+        .req-tab .tab-close {
+            font-size: 14px;
+            line-height: 1;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        .req-tab .tab-close:hover { background: rgba(255,0,0,0.2); color: var(--c-err); }
+
+        .add-tab-btn {
+            padding: 0 10px;
+            font-size: 16px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .add-tab-btn:hover { color: var(--text-secondary); background: var(--bg-input); }
 
         /* ── エディター領域 ────────────────────── */
         .editors-area {
@@ -125,57 +657,174 @@
             overflow: hidden;
         }
         .editor-panel + .editor-panel {
-            border-left: 2px solid #252526;
+            border-left: 2px solid var(--border-primary);
         }
 
-        /* タブバー */
-        .editor-tab {
-            background: #2d2d2d;
-            height: 35px;
+        /* パネルヘッダー */
+        .panel-header {
+            background: var(--bg-secondary);
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px 0 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-secondary);
+            gap: 4px;
+        }
+        .panel-title { flex-shrink: 0; white-space: nowrap; }
+        .panel-vsep {
+            width: 1px; height: 14px;
+            background: var(--border-secondary);
+            flex-shrink: 0; margin: 0 4px;
+        }
+        .panel-api-ribbon {
+            display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+        }
+        .panel-api-ribbon.hidden { display: none; }
+        .panel-api-label {
+            color: var(--text-muted); font-size: 10px; font-weight: 600;
+            white-space: nowrap; text-transform: uppercase;
+        }
+        .dto-search-inline {
+            font-size: 10px; padding: 2px 5px; width: 90px;
+            background: var(--bg-input); color: var(--text-primary);
+            border: 1px solid var(--border-input); border-radius: 3px;
+        }
+        .dto-select-inline {
+            font-size: 10px; padding: 2px 4px; width: 150px;
+            background: var(--bg-input); color: var(--text-primary);
+            border: 1px solid var(--border-input); border-radius: 3px;
+        }
+        .btn-panel {
+            font-size: 10px; font-weight: 600; padding: 3px 9px;
+            border-radius: 3px; border: 1px solid transparent;
+            cursor: pointer; display: inline-flex; align-items: center;
+            gap: 3px; white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-panel-schema {
+            background: var(--btn-schema-bg); color: var(--btn-schema-fg);
+        }
+        .btn-panel-schema:hover  { background: var(--btn-schema-hover); }
+        .btn-panel-schema:disabled { opacity: 0.5; cursor: default; }
+        .btn-panel-send {
+            background: var(--btn-send-bg); color: var(--btn-send-fg);
+        }
+        .btn-panel-send:hover    { background: var(--btn-send-hover); }
+        .btn-panel-send:disabled { opacity: 0.5; cursor: default; }
+        .btn-panel-clear {
+            background: transparent; color: var(--text-muted);
+            border-color: var(--border-input);
+        }
+        .btn-panel-clear:hover { background: var(--bg-input); }
+        .panel-actions {
+            margin-left: auto; display: flex; align-items: center; gap: 4px;
+        }
+
+        /* サブタブ (JSON / toString / Log) */
+        .sub-tabs {
+            background: var(--bg-tertiary);
+            height: 28px;
             display: flex;
             align-items: stretch;
             flex-shrink: 0;
-            border-bottom: 1px solid #252526;
+            border-bottom: 1px solid var(--border-primary);
         }
-        .tab-file {
+        .sub-tab {
             padding: 0 14px;
-            font-size: 12px;
-            color: #cccccc;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            background: #1e1e1e;
-            border-top: 1px solid #007acc;
-            border-right: 1px solid #252526;
-        }
-        .tab-file .file-dot { font-size: 9px; color: #e8c070; }
-        .tab-meta {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 12px;
-            gap: 12px;
-        }
-        .meta-tag {
             font-size: 11px;
-            font-family: Consolas, monospace;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+            border-right: 1px solid var(--border-primary);
         }
-        .c-ok    { color: #4ec9b0; }
-        .c-err   { color: #f44747; }
-        .c-info  { color: #9cdcfe; }
-        .c-warn  { color: #ce9178; }
+        .sub-tab:hover { color: var(--text-secondary); }
+        .sub-tab.active {
+            background: var(--tab-active-bg);
+            color: var(--text-secondary);
+            border-top: 1px solid var(--accent);
+        }
+        .sub-tab .meta-tag {
+            font-size: 10px;
+            font-family: Consolas, monospace;
+            color: var(--c-info);
+        }
 
         /* エディター本体 */
+        .editor-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sub-content {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sub-content.active {
+            display: flex;
+        }
+
         .editor-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
 
+        /* ── 行番号付きテキストエリア ───────────── */
+        .lined-content {
+            flex: 1;
+            overflow: auto;
+            background: var(--bg-dark);
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .lined-content table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .lined-content td {
+            vertical-align: top;
+            padding: 0;
+        }
+        .lined-content .line-num {
+            width: 40px;
+            min-width: 40px;
+            text-align: right;
+            padding: 0 8px 0 4px;
+            color: var(--line-num-fg);
+            background: var(--line-num-bg);
+            user-select: none;
+            font-size: 11px;
+            border-right: 1px solid var(--border-secondary);
+        }
+        .lined-content .line-text {
+            padding: 0 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: var(--text-string);
+        }
+        .lined-content.log-content .line-text {
+            color: var(--text-primary);
+        }
+        .lined-content .placeholder-row .line-text {
+            color: var(--text-muted);
+        }
+
         /* ── ステータスバー ────────────────────── */
         .status-bar {
-            background: #007acc;
+            background: var(--accent);
             color: #ffffff;
             font-size: 11px;
             height: 22px;
@@ -187,9 +836,9 @@
             font-family: Consolas, monospace;
             transition: background 0.2s;
         }
-        .status-bar.s-error   { background: #c72e0f; }
-        .status-bar.s-success { background: #388a34; }
-        .status-bar.s-loading { background: #5f5f5f; }
+        .status-bar.s-error   { background: var(--status-error); }
+        .status-bar.s-success { background: var(--status-ok); }
+        .status-bar.s-loading { background: var(--status-loading); }
 
         /* スピナー */
         .spinner {
@@ -202,6 +851,128 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── JNDI 接続プロファイルパネル ────────── */
+        .jndi-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 7px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+            font-size: 11px;
+        }
+        .jndi-panel.hidden { display: none; }
+        .jndi-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .jndi-panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+        }
+        .jndi-panel-arrow {
+            color: var(--text-muted);
+            font-size: 9px;
+            transition: transform 0.15s;
+        }
+        .jndi-panel-arrow.open { transform: rotate(90deg); }
+        .jndi-panel-body {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .jndi-panel-body.open { display: flex; }
+        .jndi-profile-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .jndi-profile-row select {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            min-width: 160px;
+        }
+        .jndi-profile-row .jndi-btn {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .jndi-profile-row .jndi-btn:hover { background: var(--bg-tertiary); }
+        .jndi-profile-row .jndi-btn.del:hover { background: var(--btn-danger-bg); color: var(--btn-danger-fg); }
+        .jndi-fields-col {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 3px 8px;
+            align-items: center;
+        }
+        .jndi-fields-col label {
+            color: var(--text-muted);
+            font-size: 10px;
+            white-space: nowrap;
+            font-family: monospace;
+        }
+        .jndi-fields-col input {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* ── HTTP URL バー ──────────────────────── */
+        .http-url-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+        .http-url-bar.hidden { display: none; }
+        .http-method-select {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            min-width: 72px;
+            cursor: pointer;
+        }
+        .http-url-input {
+            flex: 1;
+            font-size: 12px;
+            padding: 3px 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            font-family: var(--font-mono, monospace);
+        }
+        .http-url-input:focus { outline: 1px solid var(--accent); }
+
+        /* ── ツールバー EJB リボン ──────────────── */
+        #toolbarEjbRibbon { display: contents; }
+        #toolbarEjbRibbon.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -211,62 +982,91 @@
     <span class="app-icon">&#x2b21;</span>
     <span class="app-name">EJB API Client</span>
     <span class="app-sub">— Spring Boot</span>
+    <div class="title-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="テーマ切替">
+            <span id="themeIcon">&#9790;</span>
+            <span class="theme-label" id="themeLabel">Dark</span>
+        </button>
+    </div>
 </div>
 
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
-    <span class="toolbar-label">Endpoint:</span>
+    <!-- ── 記録・抽出 ── -->
+    <span class="toolbar-label">記録:</span>
 
-    <select id="method" class="method-select">
-        <option value="POST">POST</option>
-        <option value="GET">GET</option>
-        <option value="PUT">PUT</option>
-        <option value="DELETE">DELETE</option>
-    </select>
-
-    <input type="text" id="endpoint" class="endpoint-input"
-           value="/api/process"
-           placeholder="/api/process">
-
-    <button id="requestBtn" class="btn-request" onclick="sendRequest()">
-        <span>&#9654;</span>
-        <span>Request</span>
+    <input type="text" id="evidenceTitle" class="evidence-title-input" value="テストエビデンス" placeholder="エビデンスタイトル" title="エビデンスのタイトル">
+    <input type="text" id="evidenceComment" class="evidence-comment-input" placeholder="全体コメント（任意）" title="エビデンス全体コメント（入力時のみ出力）">
+    <button class="btn btn-evidence" onclick="exportEvidence()" title="全タブのrequest/responseをHTMLファイルとして出力">
+        <span>&#128196;</span>
+        <span>エビデンス出力</span>
     </button>
 
-    <span class="kbd-hint">Ctrl+Enter</span>
+    <div class="toolbar-sep"></div>
+
+    <button id="histToggleBtn" class="btn btn-hist-toggle" onclick="toggleHistorySidebar()" title="履歴サイドバーを表示/非表示">
+        <span>&#x1F551;</span>
+        <span>履歴</span>
+    </button>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn-extract-toggle" onclick="toggleExtractionPanel()" title="抽出リストを表示/非表示">
+        <span>&#x1F4CB;</span>
+        <span>抽出リスト</span>
+        <span id="extractionToggleArrow" class="extraction-arrow">&#x25BC;</span>
+    </button>
 </div>
 
-<!-- ─── エディター ───────────────────────────────── -->
-<div class="editors-area">
-
-    <!-- リクエスト -->
-    <div class="editor-panel">
-        <div class="editor-tab">
-            <div class="tab-file">
-                <span class="file-dot">&#9679;</span>
-                <span>request.json</span>
-            </div>
-            <div class="tab-meta">
-                <span id="inputLines" class="meta-tag c-info"></span>
-                <span id="inputBytes" class="meta-tag c-info"></span>
-            </div>
+<!-- ─── 抽出パネル ──────────────────────────────── -->
+<div id="extractionPanel" class="extraction-panel" style="display:none">
+    <div class="extraction-inner">
+        <table class="extraction-table">
+            <thead>
+                <tr>
+                    <th class="ex-th-src">Source</th>
+                    <th class="ex-th-key">Key（フィールド名）</th>
+                    <th class="ex-th-val">Value（抽出値・追記）</th>
+                    <th class="ex-th-act"></th>
+                </tr>
+            </thead>
+            <tbody id="extractionRows"></tbody>
+        </table>
+        <div class="extraction-footer">
+            <button class="btn btn-ex-add" onclick="addExtractionRow()">＋ 行追加</button>
+            <span class="extraction-hint">例: <code>data.customerId</code>（パス指定）&nbsp;／&nbsp;<code>..customerId</code>（全階層を再帰検索）</span>
         </div>
-        <div id="input-editor" class="editor-wrapper"></div>
+    </div>
+</div>
+
+<!-- ─── メインエリア ─────────────────────────────── -->
+<div class="main-area">
+
+    <!-- 履歴サイドバー -->
+    <div class="history-sidebar collapsed" id="historySidebar">
+        <div class="hist-header">
+            <span class="hist-title">&#x1F551; 履歴</span>
+            <button class="btn-hist-clear-all" onclick="clearAllHistory()">全削除</button>
+        </div>
+        <input class="hist-search" id="histSearch" type="text"
+               placeholder="&#x1F50D; 絞り込み..." oninput="renderHistoryList()">
+        <div class="hist-list" id="histList">
+            <div class="hist-empty">履歴がありません</div>
+        </div>
     </div>
 
-    <!-- レスポンス -->
-    <div class="editor-panel">
-        <div class="editor-tab">
-            <div class="tab-file">
-                <span class="file-dot">&#9679;</span>
-                <span>response.json</span>
-            </div>
-            <div class="tab-meta">
-                <span id="respHttpStatus" class="meta-tag"></span>
-                <span id="respTime"       class="meta-tag c-info"></span>
-            </div>
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <!-- ─── リクエストI/F タブバー ───────────────────── -->
+        <div class="request-tabs-bar" id="requestTabsBar">
+            <!-- 動的に生成 -->
+            <div class="add-tab-btn" onclick="addNewTab()" title="タブを追加">+</div>
         </div>
-        <div id="output-editor" class="editor-wrapper"></div>
+
+        <!-- ─── エディター ───────────────────────────────── -->
+        <div class="editors-area" id="editorsArea">
+            <!-- 動的に生成される -->
+        </div>
     </div>
 
 </div>
@@ -280,30 +1080,474 @@
 <!-- ─── Monaco Editor (CDN) ────────────────────── -->
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
 <script>
-    let inputEditor, outputEditor;
+    /* ── グローバル状態 ─────────────────────────── */
+    let monacoReady = false;
+    let allDtoList = [];              // 全DTO名リスト
+    let tabCounter = 0;               // タブ連番
+    let tabs = [];                    // { id, number, dtoName, inputEditor, outputEditor, logs }
+    let activeTabId = null;
 
-    /* Monaco 初期化 */
+    /* ── テーマ切替 ─────────────────────────────── */
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = !body.classList.contains('light-theme');
+        body.classList.toggle('light-theme', isDark);
+        document.getElementById('themeIcon').innerHTML = isDark ? '&#9728;' : '&#9790;';
+        document.getElementById('themeLabel').textContent = isDark ? 'Light' : 'Dark';
+
+        // Monaco テーマ変更
+        if (monacoReady) {
+            const theme = isDark ? 'vs' : 'vs-dark';
+            monaco.editor.setTheme(theme);
+        }
+
+        localStorage.setItem('ejb-theme', isDark ? 'light' : 'dark');
+    }
+
+    function applyStoredTheme() {
+        const stored = localStorage.getItem('ejb-theme');
+        if (stored === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeIcon').innerHTML = '&#9728;';
+            document.getElementById('themeLabel').textContent = 'Light';
+        }
+    }
+    applyStoredTheme();
+
+    /* ── DTO 一覧取得 & フィルタ ──────────────── */
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res  = await fetch('/api/dto/list');
+            allDtoList = await res.json();
+            populateDtoSelect(allDtoList);
+        } catch (e) {
+            // エラー時は各タブに表示 (タブが存在すれば)
+            tabs.forEach(t => {
+                const sel = document.getElementById('dtoSelect-' + t.id);
+                if (sel) sel.innerHTML = '<option value="">（取得エラー）</option>';
+            });
+        }
+    });
+
+    function populateDtoSelectForTab(tabId, list) {
+        const sel = document.getElementById('dtoSelect-' + tabId);
+        if (!sel) return;
+        sel.innerHTML = '';
+        if (list.length === 0) {
+            sel.innerHTML = '<option value="">（該当なし）</option>';
+        } else {
+            list.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    function populateDtoSelect(list) {
+        tabs.forEach(t => populateDtoSelectForTab(t.id, list));
+    }
+
+    function filterDtoList(tabId) {
+        const q = document.getElementById('dtoSearch-' + tabId)?.value.toLowerCase() || '';
+        const filtered = allDtoList.filter(n => n.toLowerCase().includes(q));
+        populateDtoSelectForTab(tabId, filtered);
+    }
+
+    /* ── 行番号付きテキスト生成 ──────────────── */
+    function renderLinedText(text, cssClass) {
+        if (!text || text.trim() === '') {
+            return `<div class="lined-content ${cssClass || ''}">
+                <table><tr class="placeholder-row">
+                    <td class="line-num">1</td>
+                    <td class="line-text">// (empty)</td>
+                </tr></table></div>`;
+        }
+        const lines = text.split('\n');
+        const rows = lines.map((line, i) =>
+            `<tr><td class="line-num">${i + 1}</td><td class="line-text">${escapeHtml(line)}</td></tr>`
+        ).join('');
+        return `<div class="lined-content ${cssClass || ''}"><table>${rows}</table></div>`;
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ── タブ管理 ────────────────────────────── */
+    function addNewTab(dtoName) {
+        tabCounter++;
+        const id = 'tab-' + tabCounter;
+        const tab = {
+            id,
+            number: tabCounter,
+            type: 'ejb',
+            dtoName: dtoName || 'New',
+            label: null,
+            memo: '',
+            inputEditor: null,
+            outputEditor: null,
+            logs: [],
+            reqSubTab: 'json',
+            resSubTab: 'json',
+            selected: true
+        };
+        tabs.push(tab);
+        renderTabs();
+        switchTab(id);
+        return tab;
+    }
+
+    function removeTab(id, event) {
+        if (event) event.stopPropagation();
+        if (tabs.length <= 1) return; // 最低1タブは残す
+
+        const idx = tabs.findIndex(t => t.id === id);
+        const tab = tabs[idx];
+
+        // エディター破棄
+        if (tab.inputEditor) tab.inputEditor.dispose();
+        if (tab.outputEditor) tab.outputEditor.dispose();
+
+        tabs.splice(idx, 1);
+
+        if (activeTabId === id) {
+            const newIdx = Math.min(idx, tabs.length - 1);
+            activeTabId = null;
+            renderTabs();
+            switchTab(tabs[newIdx].id);
+        } else {
+            renderTabs();
+        }
+    }
+
+    function renderTabs() {
+        const bar = document.getElementById('requestTabsBar');
+        const addBtn = bar.querySelector('.add-tab-btn');
+
+        // 既存タブ要素を削除
+        bar.querySelectorAll('.req-tab').forEach(el => el.remove());
+
+        // タブ要素を生成
+        tabs.forEach(tab => {
+            const el = document.createElement('div');
+            el.className = 'req-tab' + (tab.id === activeTabId ? ' active' : '');
+            el.draggable = true;
+            el.dataset.tabId = tab.id;
+            el.onclick = () => switchTab(tab.id);
+            el.addEventListener('dragstart', onTabDragStart);
+            el.addEventListener('dragover',  onTabDragOver);
+            el.addEventListener('dragleave', onTabDragLeave);
+            el.addEventListener('drop',      onTabDrop);
+            el.addEventListener('dragend',   onTabDragEnd);
+
+            const displayName = tab.label || `#${tab.number} ${tab.dtoName}`;
+            el.innerHTML = `
+                <input type="checkbox" class="tab-check" ${tab.selected !== false ? 'checked' : ''}
+                       onclick="toggleTabSelect('${tab.id}', event)" title="エビデンス出力対象">
+                <span class="tab-title" ondblclick="startRenameTab('${tab.id}', event)"
+                      title="ダブルクリックで名前変更">${escapeHtml(displayName)}</span>
+                <span class="tab-copy" onclick="copyTab('${tab.id}', event)" title="タブをコピー">&#x2398;</span>
+                ${tabs.length > 1
+                    ? `<span class="tab-close" onclick="removeTab('${tab.id}', event)" title="閉じる">&times;</span>`
+                    : ''}
+            `;
+            bar.insertBefore(el, addBtn);
+        });
+    }
+
+    function switchTab(id) {
+        if (activeTabId === id) return;
+
+        // 既存エディターのDOM要素を非表示
+        const area = document.getElementById('editorsArea');
+
+        // 全タブコンテンツを非表示
+        area.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+
+        activeTabId = id;
+        renderTabs();
+
+        const tab = tabs.find(t => t.id === id);
+        let contentEl = document.getElementById('content-' + id);
+
+        if (!contentEl) {
+            // 初回: コンテンツ生成
+            contentEl = createTabContent(tab);
+            area.appendChild(contentEl);
+
+            // JNDI プロファイル一覧を描画
+            renderJndiProfileOptions(tab.id);
+
+            // DTO リストをこのタブに反映
+            populateDtoSelectForTab(tab.id, allDtoList);
+
+            // Monaco エディター生成
+            if (monacoReady) {
+                initTabEditors(tab);
+            }
+        }
+
+        contentEl.style.display = 'flex';
+
+        // グローバルツールバーをアクティブタブのモードに合わせる
+        updateToolbarForActiveTab();
+    }
+
+    function createTabContent(tab) {
+        const div = document.createElement('div');
+        div.id = 'content-' + tab.id;
+        div.className = 'tab-content';
+        div.style.display = 'none';
+        div.style.flex = '1';
+        div.style.overflow = 'hidden';
+        div.style.flexDirection = 'column';
+
+        div.innerHTML = `
+        <!-- HTTP URL バー (HTTPタブのみ表示) -->
+        <div class="http-url-bar${tab.type !== 'http' ? ' hidden' : ''}" id="httpUrlBar-${tab.id}">
+            <select class="http-method-select" id="httpMethod-${tab.id}"
+                    onchange="onHttpUrlBarChange('${tab.id}')">
+                <option>GET</option>
+                <option selected>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+            </select>
+            <input class="http-url-input" id="httpUrlInput-${tab.id}"
+                   type="text" placeholder="https://"
+                   oninput="onHttpUrlBarChange('${tab.id}')">
+        </div>
+
+        <!-- JNDI 接続プロファイルパネル (EJBタブのみ表示) -->
+        <div class="jndi-panel${tab.type !== 'ejb' ? ' hidden' : ''}" id="jndiPanel-${tab.id}">
+            <div class="jndi-panel-header" onclick="toggleJndiPanel('${tab.id}')">
+                <span class="jndi-panel-arrow" id="jndiArrow-${tab.id}">&#9658;</span>
+                <span class="jndi-panel-title">JNDI 接続設定</span>
+            </div>
+            <div class="jndi-panel-body" id="jndiBody-${tab.id}">
+                <div class="jndi-profile-row">
+                    <select id="jndiSelect-${tab.id}" onchange="loadJndiProfile('${tab.id}')">
+                        <option value="">-- プロファイル選択 --</option>
+                    </select>
+                    <button class="jndi-btn" onclick="saveJndiProfile('${tab.id}')">保存</button>
+                    <button class="jndi-btn del" onclick="deleteJndiProfile('${tab.id}')">削除</button>
+                </div>
+                <div class="jndi-fields-col">
+                    <label>java.naming.factory.initial:</label>
+                    <input id="jndiFactory-${tab.id}" type="text"
+                           placeholder="weblogic.jndi.WLInitialContextFactory">
+                    <label>java.naming.provider.url:</label>
+                    <input id="jndiUrl-${tab.id}" type="text"
+                           placeholder="t3://localhost:7001">
+                    <label>java.naming.security.principal:</label>
+                    <input id="jndiPrincipal-${tab.id}" type="text"
+                           placeholder="admin">
+                    <label>java.naming.security.credentials:</label>
+                    <input id="jndiCreds-${tab.id}" type="password"
+                           placeholder="password">
+                </div>
+            </div>
+        </div>
+
+        <div class="editors-row">
+            <!-- Request パネル -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">&#9654; Request</span>
+                    <!-- EJB モード: API リボン -->
+                    <span class="panel-vsep"></span>
+                    <div class="panel-api-ribbon${tab.type !== 'ejb' ? ' hidden' : ''}"
+                         id="tabEjbRibbon-${tab.id}">
+                        <span class="panel-api-label">API:</span>
+                        <input id="dtoSearch-${tab.id}" class="dto-search-inline" type="text"
+                               placeholder="&#x1F50D; 検索…" oninput="filterDtoList('${tab.id}')">
+                        <select id="dtoSelect-${tab.id}" class="dto-select-inline">
+                            <option value="">-- DTO --</option>
+                        </select>
+                        <button id="schemaBtn-${tab.id}" class="btn-panel btn-panel-schema"
+                                onclick="loadDtoSchemaToActiveTab()">&#x27a1; DTO to JSON</button>
+                    </div>
+                    <!-- 右端: Send / Clear / モード切り替え -->
+                    <div class="panel-actions">
+                        <button id="requestBtn-${tab.id}" class="btn-panel btn-panel-send"
+                                onclick="sendRequestFromActiveTab()">&#9654; Send</button>
+                        <button class="btn-panel btn-panel-clear"
+                                onclick="clearActiveTab()">&#x2715; Clear</button>
+                        <span class="panel-vsep"></span>
+                        <div class="type-toggle" id="typeToggle-${tab.id}">
+                            <span class="type-btn ejb${tab.type === 'ejb' ? ' active' : ''}"
+                                  onclick="setTabType('${tab.id}','ejb')">EJB</span>
+                            <span class="type-btn http${tab.type === 'http' ? ' active' : ''}"
+                                  onclick="setTabType('${tab.id}','http')">HTTP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-side="req" data-sub="json"
+                         onclick="switchSubTab('${tab.id}', 'req', 'json')">
+                        JSON
+                        <span class="meta-tag" id="reqLines-${tab.id}"></span>
+                        <span class="meta-tag" id="reqBytes-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="req" data-sub="tostring"
+                         onclick="switchSubTab('${tab.id}', 'req', 'tostring')">
+                        toString
+                        <span class="meta-tag" id="reqTsLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="req" data-sub="log"
+                         onclick="switchSubTab('${tab.id}', 'req', 'log')">
+                        Log
+                        <span class="meta-tag" id="reqLogCount-${tab.id}"></span>
+                    </div>
+                </div>
+                <div class="editor-body">
+                    <div class="sub-content active" id="reqJson-${tab.id}">
+                        <div id="reqEditor-${tab.id}" class="editor-wrapper"></div>
+                    </div>
+                    <div class="sub-content" id="reqTostring-${tab.id}">
+                        <div id="reqTsContent-${tab.id}">
+                            ${renderLinedText('// DTO to JSON または Send を実行してください')}
+                        </div>
+                    </div>
+                    <div class="sub-content" id="reqLog-${tab.id}">
+                        <div id="reqLogContent-${tab.id}">
+                            ${renderLinedText('// ログなし', 'log-content')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response パネル -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span>&#9664; Response</span>
+                    <span style="margin-left:auto; display:flex; gap:12px;">
+                        <span class="meta-tag" id="respHttpStatus-${tab.id}" style="color:var(--c-info)"></span>
+                        <span class="meta-tag" id="respTime-${tab.id}" style="color:var(--c-info)"></span>
+                    </span>
+                </div>
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-side="res" data-sub="json"
+                         onclick="switchSubTab('${tab.id}', 'res', 'json')">
+                        JSON
+                        <span class="meta-tag" id="resLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="res" data-sub="tostring"
+                         onclick="switchSubTab('${tab.id}', 'res', 'tostring')">
+                        toString
+                        <span class="meta-tag" id="resTosLines-${tab.id}"></span>
+                    </div>
+                    <div class="sub-tab" data-side="res" data-sub="log"
+                         onclick="switchSubTab('${tab.id}', 'res', 'log')">
+                        Log
+                        <span class="meta-tag" id="resLogCount-${tab.id}"></span>
+                    </div>
+                </div>
+                <div class="editor-body">
+                    <div class="sub-content active" id="resJson-${tab.id}">
+                        <div id="resEditor-${tab.id}" class="editor-wrapper"></div>
+                    </div>
+                    <div class="sub-content" id="resTostring-${tab.id}">
+                        <div id="resTosContent-${tab.id}">
+                            ${renderLinedText('// Send を実行してください')}
+                        </div>
+                    </div>
+                    <div class="sub-content" id="resLog-${tab.id}">
+                        <div id="resLogContent-${tab.id}">
+                            ${renderLinedText('// ログなし', 'log-content')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-memo-bar">
+            <textarea class="tab-memo" placeholder="メモ（テスト観点・期待値など）入力するとエビデンスに出力されます"
+                      oninput="saveTabMemo('${tab.id}', this.value)">${escapeHtml(tab.memo || '')}</textarea>
+        </div>
+        `;
+
+        return div;
+    }
+
+    function switchSubTab(tabId, side, sub) {
+        const contentEl = document.getElementById('content-' + tabId);
+        const prefix = side === 'req' ? 'req' : 'res';
+
+        // サブタブのアクティブ切替
+        contentEl.querySelectorAll(`.sub-tab[data-side="${side}"]`).forEach(el => {
+            el.classList.toggle('active', el.dataset.sub === sub);
+        });
+
+        // コンテンツ切替
+        const panels = {
+            json: document.getElementById(`${prefix}Json-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Json-${tabId}`),
+            tostring: document.getElementById(`${prefix}Tostring-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Tostring-${tabId}`),
+            log: document.getElementById(`${prefix}Log-${tabId}`) || document.getElementById(`${prefix === 'res' ? 'res' : 'req'}Log-${tabId}`)
+        };
+
+        Object.entries(panels).forEach(([key, el]) => {
+            if (el) el.classList.toggle('active', key === sub);
+        });
+
+        // Monaco エディターのレイアウト再計算
+        const tab = tabs.find(t => t.id === tabId);
+        if (tab && sub === 'json') {
+            setTimeout(() => {
+                if (side === 'req' && tab.inputEditor) tab.inputEditor.layout();
+                if (side === 'res' && tab.outputEditor) tab.outputEditor.layout();
+            }, 10);
+        }
+
+        // 状態保存
+        if (side === 'req') {
+            tab.reqSubTab = sub;
+        } else {
+            tab.resSubTab = sub;
+        }
+    }
+
+    /* ── Monaco 初期化 ─────────────────────────── */
     require.config({
         paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' }
     });
 
     require(['vs/editor/editor.main'], function () {
+        monacoReady = true;
 
-        const EDITOR_OPTS = {
+        // テーマ設定
+        const isLight = document.body.classList.contains('light-theme');
+        if (isLight) monaco.editor.setTheme('vs');
+
+        // 既存タブにエディター割当
+        tabs.forEach(tab => {
+            if (!tab.inputEditor) initTabEditors(tab);
+        });
+    });
+
+    function getEditorOpts(readOnly) {
+        return {
             language: 'json',
-            theme: 'vs-dark',
+            theme: document.body.classList.contains('light-theme') ? 'vs' : 'vs-dark',
             automaticLayout: true,
             fontSize: 13,
             lineHeight: 20,
             fontFamily: "'Cascadia Code', Consolas, 'Courier New', monospace",
             fontLigatures: true,
-            minimap:  { enabled: false },
+            minimap: { enabled: false },
             scrollBeyondLastLine: false,
             tabSize: 2,
             renderWhitespace: 'boundary',
-            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+            readOnly: !!readOnly,
+            lineNumbers: 'on',
+            formatOnPaste: !readOnly,
+            formatOnType: !readOnly
         };
+    }
 
+    function initTabEditors(tab) {
         const defaultRequest = JSON.stringify({
             operationType: "getCustomer",
             data: {
@@ -312,131 +1556,984 @@
             }
         }, null, 2);
 
-        /* ── リクエストエディター (編集可能) */
-        inputEditor = monaco.editor.create(
-            document.getElementById('input-editor'),
-            { ...EDITOR_OPTS, value: defaultRequest, formatOnPaste: true, formatOnType: true }
-        );
+        // Request Editor
+        const reqEl = document.getElementById('reqEditor-' + tab.id);
+        if (reqEl) {
+            tab.inputEditor = monaco.editor.create(reqEl, {
+                ...getEditorOpts(false),
+                value: tab._copyReqJson != null ? tab._copyReqJson : defaultRequest
+            });
 
-        /* ── レスポンスエディター (読み取り専用) */
-        outputEditor = monaco.editor.create(
-            document.getElementById('output-editor'),
-            {
-                ...EDITOR_OPTS,
-                value: '// Request ボタンを押してください (Ctrl+Enter)',
-                readOnly: true
+            // 入力メタ情報更新
+            const updateReqMeta = () => {
+                const v = tab.inputEditor.getValue();
+                const lines = v.split('\n').length;
+                const bytes = new TextEncoder().encode(v).length;
+                const linesEl = document.getElementById('reqLines-' + tab.id);
+                const bytesEl = document.getElementById('reqBytes-' + tab.id);
+                if (linesEl) linesEl.textContent = lines + ' lines';
+                if (bytesEl) bytesEl.textContent = fmtBytes(bytes);
+            };
+            tab.inputEditor.onDidChangeModelContent(updateReqMeta);
+            updateReqMeta();
+
+            // Ctrl+Enter
+            tab.inputEditor.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                () => sendRequestFromActiveTab()
+            );
+        }
+
+        // Response Editor
+        const resEl = document.getElementById('resEditor-' + tab.id);
+        if (resEl) {
+            tab.outputEditor = monaco.editor.create(resEl, {
+                ...getEditorOpts(true),
+                value: tab._copyResJson || '// Send ボタンを押してください (Ctrl+Enter)'
+            });
+        }
+    }
+
+    /* ── DTO → JSON (アクティブタブに適用) ────── */
+    async function loadDtoSchemaToActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+
+        const sel = document.getElementById('dtoSelect-' + activeTabId);
+        const className = sel?.value;
+        if (!className) return;
+
+        const btn = document.getElementById('schemaBtn-' + activeTabId);
+        if (btn) btn.disabled = true;
+        setStatus('loading', className + ' をロード中…');
+
+        try {
+            const res  = await fetch('/api/dto/schema/' + encodeURIComponent(className));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (tab.inputEditor) {
+                tab.inputEditor.setValue(JSON.stringify(data.json, null, 2));
             }
-        );
 
-        /* 入力サイズ表示 */
-        const updateInputMeta = () => {
-            const v = inputEditor.getValue();
-            document.getElementById('inputLines').textContent =
-                v.split('\n').length + ' lines';
-            document.getElementById('inputBytes').textContent =
-                fmtBytes(new TextEncoder().encode(v).length);
-        };
-        inputEditor.onDidChangeModelContent(updateInputMeta);
-        updateInputMeta();
+            // toString 更新
+            const tsContent = document.getElementById('reqTsContent-' + tab.id);
+            if (tsContent) {
+                tsContent.innerHTML = renderLinedText(data.toStringValue || '');
+                updateSubTabMeta(tab.id, 'req', 'tostring', data.toStringValue || '');
+            }
 
-        /* エディター内 Ctrl+Enter ショートカット */
-        inputEditor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-            sendRequest
-        );
-    });
+            // タブ名更新
+            tab.dtoName = className;
+            renderTabs();
 
-    /* ─────────────────────────────────────────────── */
-    async function sendRequest() {
-        const btn            = document.getElementById('requestBtn');
-        const statusBar      = document.getElementById('statusBar');
-        const respHttpStatus = document.getElementById('respHttpStatus');
-        const respTime       = document.getElementById('respTime');
+            // ログ追加
+            addLog(tab, 'req', `[DTO to JSON] ${className} loaded`);
+
+            setStatus('', className + ' のスキーマを表示しました');
+        } catch (e) {
+            addLog(tab, 'req', `[ERROR] DTOロードエラー: ${e.message}`);
+            setStatus('error', 'DTOロードエラー: ' + e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    /* ── Send Request (アクティブタブ) ─────────── */
+    async function sendRequestFromActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab || !tab.inputEditor) return;
+
+        const btn            = document.getElementById('requestBtn-' + tab.id);
+        const respHttpStatus = document.getElementById('respHttpStatus-' + tab.id);
+        const respTime       = document.getElementById('respTime-' + tab.id);
 
         /* JSON バリデーション */
         let body;
         try {
-            body = JSON.parse(inputEditor.getValue());
+            body = JSON.parse(tab.inputEditor.getValue());
         } catch (e) {
             setStatus('error', 'JSON Parse Error: ' + e.message);
-            outputEditor.setValue(JSON.stringify({
-                error:   'Invalid JSON',
-                message: e.message,
-                hint:    'リクエスト JSON を確認してください'
-            }, null, 2));
-            respHttpStatus.textContent  = 'JSON Error';
-            respHttpStatus.className    = 'meta-tag c-err';
-            respTime.textContent        = '';
+            if (tab.outputEditor) {
+                tab.outputEditor.setValue(JSON.stringify({
+                    error:   'Invalid JSON',
+                    message: e.message
+                }, null, 2));
+            }
+            if (respHttpStatus) {
+                respHttpStatus.textContent = 'JSON Error';
+                respHttpStatus.style.color = 'var(--c-err)';
+            }
+            if (respTime) respTime.textContent = '';
+            addLog(tab, 'req', `[ERROR] JSON Parse Error: ${e.message}`);
             return;
         }
 
-        /* ローディング状態 */
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span><span>Requesting…</span>';
-        setStatus('loading', 'EJB サービスを呼び出し中…');
-        respHttpStatus.textContent = '';
-        respTime.textContent       = '';
+        btn.innerHTML = '<span class="spinner"></span><span>Sending…</span>';
+        const isHttp  = tab.type === 'http';
+        const endpoint = isHttp ? '/api/http-proxy' : '/api/process';
+        setStatus('loading', isHttp ? 'HTTP リクエスト送信中…' : 'EJB サービスを呼び出し中…');
+        if (respHttpStatus) respHttpStatus.textContent = '';
+        if (respTime) respTime.textContent = '';
 
-        const endpoint = document.getElementById('endpoint').value;
-        const method   = document.getElementById('method').value;
-        const t0       = performance.now();
+        // EJB タブのとき JNDI 接続情報をインジェクト
+        if (!isHttp) {
+            const jndi = getJndiDataForTab(tab.id);
+            if (jndi) body.jndi = jndi;
+        }
+
+        if (isHttp) {
+            addLog(tab, 'req', `[SEND] ${(body.method || 'GET').toUpperCase()} ${body.url || ''}`);
+        } else {
+            addLog(tab, 'req', `[SEND] POST /api/process`);
+        }
+        addLog(tab, 'req', `[SEND] Body: ${JSON.stringify(body).substring(0, 200)}`);
+
+        tab._timestamp = new Date().toLocaleString('ja-JP');
+        const t0 = performance.now();
 
         try {
-            const opts = {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept':       'application/json'
-                }
-            };
-            if (method !== 'GET' && method !== 'DELETE') {
-                opts.body = JSON.stringify(body);
-            }
-
-            const res     = await fetch(endpoint, opts);
+            const res     = await fetch(endpoint, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body:    JSON.stringify(body)
+            });
             const elapsed = Math.round(performance.now() - t0);
             const text    = await res.text();
 
-            /* レスポンス表示 */
-            try {
-                outputEditor.setValue(JSON.stringify(JSON.parse(text), null, 2));
-            } catch {
-                outputEditor.setValue(text);
+            let parsed;
+            try { parsed = JSON.parse(text); } catch { parsed = null; }
+
+            /* レスポンスJSON表示 */
+            if (parsed && parsed.responseJson !== undefined) {
+                const resJson = JSON.stringify(parsed.responseJson, null, 2);
+                if (tab.outputEditor) tab.outputEditor.setValue(resJson);
+
+                // Response JSON lines 更新
+                const resLinesEl = document.getElementById('resLines-' + tab.id);
+                if (resLinesEl) resLinesEl.textContent = resJson.split('\n').length + ' lines';
+
+                /* RequestDto toString */
+                const reqTsContent = document.getElementById('reqTsContent-' + tab.id);
+                if (reqTsContent) {
+                    reqTsContent.innerHTML = renderLinedText(parsed.requestToString || '');
+                    updateSubTabMeta(tab.id, 'req', 'tostring', parsed.requestToString || '');
+                }
+                tab._requestToString = parsed.requestToString || '';
+
+                /* ResponseDto toString */
+                const resTosContent = document.getElementById('resTosContent-' + tab.id);
+                if (resTosContent) {
+                    resTosContent.innerHTML = renderLinedText(parsed.responseToString || '');
+                    updateSubTabMeta(tab.id, 'res', 'tostring', parsed.responseToString || '');
+                }
+                tab._responseToString = parsed.responseToString || '';
+            } else {
+                const fallback = parsed ? JSON.stringify(parsed, null, 2) : text;
+                if (tab.outputEditor) tab.outputEditor.setValue(fallback);
             }
 
-            respTime.textContent = elapsed + ' ms';
+            if (respTime) respTime.textContent = elapsed + ' ms';
+            tab._httpStatus = res.status;
+            tab._httpStatusText = res.statusText;
+            tab._respTime = elapsed;
 
             if (res.ok) {
                 setStatus('success', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
-                respHttpStatus.textContent = 'HTTP ' + res.status;
-                respHttpStatus.className   = 'meta-tag c-ok';
+                if (respHttpStatus) {
+                    respHttpStatus.textContent = 'HTTP ' + res.status;
+                    respHttpStatus.style.color = 'var(--c-ok)';
+                }
+                addLog(tab, 'res', `[RESPONSE] HTTP ${res.status} ${res.statusText} — ${elapsed} ms`);
             } else {
                 setStatus('error', `HTTP ${res.status} ${res.statusText}  —  ${elapsed} ms`);
-                respHttpStatus.textContent = 'HTTP ' + res.status;
-                respHttpStatus.className   = 'meta-tag c-err';
+                if (respHttpStatus) {
+                    respHttpStatus.textContent = 'HTTP ' + res.status;
+                    respHttpStatus.style.color = 'var(--c-err)';
+                }
+                addLog(tab, 'res', `[ERROR] HTTP ${res.status} ${res.statusText} — ${elapsed} ms`);
             }
 
         } catch (e) {
             const elapsed = Math.round(performance.now() - t0);
             setStatus('error', 'Network Error: ' + e.message);
-            outputEditor.setValue(JSON.stringify({
-                error:   'Network Error',
-                message: e.message,
-                hint:    'サーバーが起動しているか確認してください'
-            }, null, 2));
-            respHttpStatus.textContent = 'Error';
-            respHttpStatus.className   = 'meta-tag c-err';
-            respTime.textContent       = elapsed + ' ms';
+            if (tab.outputEditor) {
+                tab.outputEditor.setValue(JSON.stringify({ error: 'Network Error', message: e.message }, null, 2));
+            }
+            if (respHttpStatus) {
+                respHttpStatus.textContent = 'Error';
+                respHttpStatus.style.color = 'var(--c-err)';
+            }
+            if (respTime) respTime.textContent = elapsed + ' ms';
+            addLog(tab, 'res', `[ERROR] Network Error: ${e.message} — ${elapsed} ms`);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<span>&#9654;</span><span>Request</span>';
+            btn.innerHTML = '<span>&#9654;</span><span>Send</span>';
+            addToHistory(tab);
         }
     }
 
+    /* ── ログ管理 ─────────────────────────────── */
+    function addLog(tab, side, message) {
+        const now = new Date();
+        const ts = now.toLocaleTimeString('ja-JP', { hour12: false }) +
+                   '.' + String(now.getMilliseconds()).padStart(3, '0');
+        const entry = `[${ts}] ${message}`;
+
+        if (!tab._logs) tab._logs = { req: [], res: [] };
+        tab._logs[side].push(entry);
+
+        // ログ表示更新
+        const logContent = document.getElementById(`${side === 'req' ? 'req' : 'res'}LogContent-${tab.id}`);
+        if (logContent) {
+            const allLogs = tab._logs[side].join('\n');
+            logContent.innerHTML = renderLinedText(allLogs, 'log-content');
+        }
+
+        // ログ件数更新
+        const countEl = document.getElementById(`${side === 'req' ? 'req' : 'res'}LogCount-${tab.id}`);
+        if (countEl) countEl.textContent = tab._logs[side].length + ' entries';
+    }
+
+    /* ── サブタブメタ情報更新 ─────────────────── */
+    function updateSubTabMeta(tabId, side, sub, text) {
+        if (sub === 'tostring') {
+            const lines = text ? text.split('\n').length : 0;
+            const elId = side === 'req' ? `reqTsLines-${tabId}` : `resTosLines-${tabId}`;
+            const el = document.getElementById(elId);
+            if (el) el.textContent = lines + ' lines';
+        }
+    }
+
+    /* ── クリア ───────────────────────────────── */
+    function clearActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+
+        // Request エディターをモード別デフォルトに戻す
+        if (tab.inputEditor) {
+            tab.inputEditor.setValue(tab.type === 'http' ? HTTP_TEMPLATE : JSON.stringify({
+                operationType: "getCustomer",
+                data: { customerId: "C001", includeOrders: true }
+            }, null, 2));
+        }
+
+        // Response エディターをクリア
+        if (tab.outputEditor) {
+            tab.outputEditor.setValue('// Send ボタンを押してください (Ctrl+Enter)');
+        }
+
+        // toString クリア
+        const reqTs = document.getElementById('reqTsContent-' + tab.id);
+        if (reqTs) reqTs.innerHTML = renderLinedText('// DTO to JSON または Send を実行してください');
+
+        const resTs = document.getElementById('resTosContent-' + tab.id);
+        if (resTs) resTs.innerHTML = renderLinedText('// Send を実行してください');
+
+        // ログクリア
+        if (tab._logs) tab._logs = { req: [], res: [] };
+        const reqLog = document.getElementById('reqLogContent-' + tab.id);
+        if (reqLog) reqLog.innerHTML = renderLinedText('// ログなし', 'log-content');
+        const resLog = document.getElementById('resLogContent-' + tab.id);
+        if (resLog) resLog.innerHTML = renderLinedText('// ログなし', 'log-content');
+
+        // メタ情報リセット
+        ['reqLines', 'reqBytes', 'resLines', 'reqTsLines', 'resTosLines',
+         'reqLogCount', 'resLogCount', 'respHttpStatus', 'respTime'].forEach(key => {
+            const el = document.getElementById(key + '-' + tab.id);
+            if (el) el.textContent = '';
+        });
+
+        setStatus('', 'クリアしました');
+    }
+
+    /* ── タブ選択トグル ───────────────────────── */
+    function toggleTabSelect(id, event) {
+        event.stopPropagation();
+        const tab = tabs.find(t => t.id === id);
+        if (tab) tab.selected = event.target.checked;
+    }
+
+    /* ── タブ名リネーム ───────────────────────── */
+    function startRenameTab(id, event) {
+        event.stopPropagation();
+        const tab = tabs.find(t => t.id === id);
+        if (!tab) return;
+        const span = event.currentTarget;
+        const currentLabel = tab.label || `#${tab.number} ${tab.dtoName}`;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'tab-rename-input';
+        input.value = currentLabel;
+        span.replaceWith(input);
+        input.focus();
+        input.select();
+        const finish = () => {
+            const val = input.value.trim();
+            tab.label = val || null;
+            renderTabs();
+        };
+        input.onblur = finish;
+        input.onkeydown = e => {
+            if (e.key === 'Enter')  { input.blur(); }
+            if (e.key === 'Escape') { input.value = currentLabel; input.blur(); }
+            e.stopPropagation();
+        };
+    }
+
+    /* ── タブコピー ───────────────────────────── */
+    function copyTab(id, event) {
+        event.stopPropagation();
+        const src = tabs.find(t => t.id === id);
+        if (!src) return;
+        tabCounter++;
+        const newId = 'tab-' + tabCounter;
+        const newTab = {
+            id: newId,
+            number: tabCounter,
+            dtoName: src.dtoName,
+            label: src.label ? src.label + ' (コピー)' : null,
+            memo: src.memo || '',
+            inputEditor: null,
+            outputEditor: null,
+            logs: [],
+            reqSubTab: 'json',
+            resSubTab: 'json',
+            selected: src.selected,
+            _copyReqJson:        src.inputEditor  ? src.inputEditor.getValue()  : '',
+            _copyResJson:        src.outputEditor ? src.outputEditor.getValue() : '',
+            _requestToString:    src._requestToString  || '',
+            _responseToString:   src._responseToString || '',
+            _httpStatus:         src._httpStatus     || '',
+            _httpStatusText:     src._httpStatusText  || '',
+            _respTime:           src._respTime != null ? src._respTime : null,
+            _timestamp:          src._timestamp || '',
+            _logs:               src._logs ? { req: [...src._logs.req], res: [...src._logs.res] } : null,
+        };
+        const srcIdx = tabs.findIndex(t => t.id === id);
+        tabs.splice(srcIdx + 1, 0, newTab);
+        renderTabs();
+        switchTab(newId);
+    }
+
+    /* ── タブ ドラッグ並べ替え ───────────────── */
+    let _dragSrcTabId = null;
+
+    function onTabDragStart(e) {
+        _dragSrcTabId = e.currentTarget.dataset.tabId;
+        e.currentTarget.classList.add('tab-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    function onTabDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (e.currentTarget.dataset.tabId !== _dragSrcTabId)
+            e.currentTarget.classList.add('tab-drag-over');
+    }
+    function onTabDragLeave(e) {
+        e.currentTarget.classList.remove('tab-drag-over');
+    }
+    function onTabDrop(e) {
+        e.preventDefault();
+        const targetId = e.currentTarget.dataset.tabId;
+        e.currentTarget.classList.remove('tab-drag-over');
+        if (!_dragSrcTabId || _dragSrcTabId === targetId) return;
+        const srcIdx = tabs.findIndex(t => t.id === _dragSrcTabId);
+        const tgtIdx = tabs.findIndex(t => t.id === targetId);
+        tabs.splice(tgtIdx, 0, tabs.splice(srcIdx, 1)[0]);
+        renderTabs();
+    }
+    function onTabDragEnd(e) {
+        e.currentTarget.classList.remove('tab-dragging');
+        document.querySelectorAll('.req-tab').forEach(el => el.classList.remove('tab-drag-over'));
+        _dragSrcTabId = null;
+    }
+
+    /* ── タブメモ保存 ─────────────────────────── */
+    function saveTabMemo(id, value) {
+        const tab = tabs.find(t => t.id === id);
+        if (tab) tab.memo = value;
+    }
+
+    /* ── 履歴 ─────────────────────────────────── */
+    const HIST_KEY = 'ejb-history';
+    const HIST_MAX = 200;
+    let historyOpen = false;
+
+    function _loadHistEntries() {
+        try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
+        catch { return []; }
+    }
+    function _saveHistEntries(arr) {
+        localStorage.setItem(HIST_KEY, JSON.stringify(arr));
+    }
+
+    function addToHistory(tab) {
+        const entries = _loadHistEntries();
+        const label = tab.label || `#${tab.number} ${tab.dtoName}`;
+        entries.unshift({
+            id:         'h' + Date.now(),
+            ts:         new Date().toISOString(),
+            dtoName:    tab.dtoName,
+            label:      label,
+            reqJson:    tab.inputEditor  ? tab.inputEditor.getValue()  : '',
+            resJson:    tab.outputEditor ? tab.outputEditor.getValue() : '',
+            httpStatus: tab._httpStatus || null,
+            respTime:   tab._respTime   || null,
+        });
+        if (entries.length > HIST_MAX) entries.length = HIST_MAX;
+        _saveHistEntries(entries);
+        if (historyOpen) renderHistoryList();
+    }
+
+    function deleteHistoryEntry(id, e) {
+        e.stopPropagation();
+        _saveHistEntries(_loadHistEntries().filter(h => h.id !== id));
+        renderHistoryList();
+    }
+
+    function clearAllHistory() {
+        if (!confirm('履歴を全件削除しますか？')) return;
+        _saveHistEntries([]);
+        renderHistoryList();
+    }
+
+    function loadFromHistory(id) {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+        const entry = _loadHistEntries().find(h => h.id === id);
+        if (!entry) return;
+        if (tab.inputEditor  && entry.reqJson) tab.inputEditor.setValue(entry.reqJson);
+        if (tab.outputEditor && entry.resJson) tab.outputEditor.setValue(entry.resJson);
+        setStatus('info', `履歴ロード: ${entry.label}`);
+    }
+
+    function renderHistoryList() {
+        const list = document.getElementById('histList');
+        if (!list) return;
+        const query   = (document.getElementById('histSearch')?.value || '').toLowerCase();
+        const entries = _loadHistEntries().filter(h =>
+            !query ||
+            h.dtoName.toLowerCase().includes(query) ||
+            h.label.toLowerCase().includes(query)
+        );
+        if (entries.length === 0) {
+            list.innerHTML = '<div class="hist-empty">履歴がありません</div>';
+            return;
+        }
+        list.innerHTML = entries.map(h => {
+            const d       = new Date(h.ts);
+            const dateStr = d.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
+            const timeStr = d.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const ok      = h.httpStatus && h.httpStatus < 400;
+            const badge   = h.httpStatus
+                ? `<span class="hist-badge ${ok ? 'ok' : 'err'}">${h.httpStatus}</span>` : '';
+            const timeTag = h.respTime != null ? `<span class="hist-time">${h.respTime} ms</span>` : '';
+            return `
+            <div class="hist-entry" onclick="loadFromHistory('${h.id}')">
+                <button class="btn-hist-del" onclick="deleteHistoryEntry('${h.id}',event)" title="削除">&times;</button>
+                <div class="hist-entry-top">
+                    <span class="hist-dto">${escHtml(h.dtoName)}</span>
+                    ${badge}
+                </div>
+                <div class="hist-label">${escHtml(h.label)}</div>
+                <div class="hist-meta">
+                    <span>${dateStr} ${timeStr}</span>
+                    ${timeTag}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleHistorySidebar() {
+        historyOpen = !historyOpen;
+        const sidebar = document.getElementById('historySidebar');
+        sidebar.classList.toggle('collapsed', !historyOpen);
+        document.getElementById('histToggleBtn').classList.toggle('active', historyOpen);
+        if (historyOpen) renderHistoryList();
+    }
+
+    /* ── タブ種別切り替え ──────────────────────── */
+    // HTTP テンプレート
+    // Web API (JSON) : body にオブジェクト → Content-Type: application/json を自動付与
+    // Form POST      : headers に "Content-Type":"application/x-www-form-urlencoded" を追加すると
+    //                  body オブジェクトを key=value&... 形式で自動エンコード
+    const HTTP_TEMPLATE = JSON.stringify({
+        method:  'POST',
+        url:     'https://',
+        headers: { 'Accept': 'application/json' },
+        body:    {}
+    }, null, 2);
+
+    const EJB_TEMPLATE = JSON.stringify({
+        operationType: '',
+        data: {}
+    }, null, 2);
+
+    function setTabType(tabId, type) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || tab.type === type) return;
+        tab.type = type;
+
+        // トグルUI更新
+        const toggle = document.getElementById('typeToggle-' + tabId);
+        if (toggle) {
+            toggle.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.classList.contains(type));
+            });
+        }
+
+        // エディタテンプレート切り替え
+        const placeholder = '// Send ボタンを押してください (Ctrl+Enter)';
+        if (tab.inputEditor) {
+            tab.inputEditor.setValue(type === 'http' ? HTTP_TEMPLATE : EJB_TEMPLATE);
+        }
+        if (tab.outputEditor) tab.outputEditor.setValue(placeholder);
+        tab._httpStatus = null;
+        tab._respTime   = null;
+
+        const respHttpStatus = document.getElementById('respHttpStatus-' + tabId);
+        const respTime       = document.getElementById('respTime-' + tabId);
+        if (respHttpStatus) respHttpStatus.textContent = '';
+        if (respTime) respTime.textContent = '';
+
+        // JNDI パネル: EJB のみ表示
+        const jndiPanel = document.getElementById('jndiPanel-' + tabId);
+        if (jndiPanel) jndiPanel.classList.toggle('hidden', type !== 'ejb');
+
+        // HTTP URL バー: HTTP のみ表示
+        const httpUrlBar = document.getElementById('httpUrlBar-' + tabId);
+        if (httpUrlBar) {
+            httpUrlBar.classList.toggle('hidden', type !== 'http');
+            if (type === 'http') syncUrlBarFromEditor(tabId);
+        }
+
+        // タブ内 EJB API リボン: EJB のみ表示
+        const tabEjbRibbon = document.getElementById('tabEjbRibbon-' + tabId);
+        if (tabEjbRibbon) tabEjbRibbon.classList.toggle('hidden', type !== 'ejb');
+    }
+
+    /* ── (旧グローバルツールバー切り替え: 不要になったが互換のため残す) ── */
+    function updateToolbarForActiveTab() { /* no-op */ }
+
+    /* ── HTTP URL バー ↔ JSON エディター同期 ── */
+    function syncUrlBarFromEditor(tabId) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || !tab.inputEditor) return;
+        try {
+            const body = JSON.parse(tab.inputEditor.getValue());
+            const methodEl = document.getElementById('httpMethod-' + tabId);
+            const urlEl    = document.getElementById('httpUrlInput-' + tabId);
+            if (methodEl && body.method) methodEl.value = body.method;
+            if (urlEl    && body.url   ) urlEl.value    = body.url;
+        } catch (e) { /* JSON 未確定時は無視 */ }
+    }
+
+    function onHttpUrlBarChange(tabId) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || !tab.inputEditor) return;
+        const method = document.getElementById('httpMethod-'   + tabId)?.value || 'GET';
+        const url    = document.getElementById('httpUrlInput-' + tabId)?.value || '';
+        try {
+            const body = JSON.parse(tab.inputEditor.getValue());
+            body.method = method;
+            body.url    = url;
+            tab.inputEditor.setValue(JSON.stringify(body, null, 2));
+        } catch (e) { /* JSON が壊れているときは上書きしない */ }
+    }
+
+    /* ── JNDI プロファイル管理 ─────────────────── */
+    const JNDI_PROFILES_KEY = 'ejb-jndi-profiles';
+
+    function getJndiProfiles() {
+        try { return JSON.parse(localStorage.getItem(JNDI_PROFILES_KEY)) || []; }
+        catch { return []; }
+    }
+    function _saveJndiProfiles(profiles) {
+        localStorage.setItem(JNDI_PROFILES_KEY, JSON.stringify(profiles));
+    }
+
+    function renderJndiProfileOptions(tabId) {
+        const sel = document.getElementById('jndiSelect-' + tabId);
+        if (!sel) return;
+        const current = sel.value;
+        const profiles = getJndiProfiles();
+        sel.innerHTML = '<option value="">-- プロファイル選択 --</option>'
+            + profiles.map(p => `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
+        if (current) sel.value = current;
+    }
+
+    function toggleJndiPanel(tabId) {
+        const body  = document.getElementById('jndiBody-'  + tabId);
+        const arrow = document.getElementById('jndiArrow-' + tabId);
+        if (!body) return;
+        const open = body.classList.toggle('open');
+        if (arrow) arrow.classList.toggle('open', open);
+    }
+
+    function loadJndiProfile(tabId) {
+        const sel = document.getElementById('jndiSelect-' + tabId);
+        const name = sel ? sel.value : '';
+        if (!name) return;
+        const profile = getJndiProfiles().find(p => p.name === name);
+        if (!profile) return;
+        document.getElementById('jndiFactory-' + tabId).value   = profile.factory   || '';
+        document.getElementById('jndiUrl-'     + tabId).value   = profile.url       || '';
+        document.getElementById('jndiPrincipal-' + tabId).value = profile.principal || '';
+        document.getElementById('jndiCreds-'   + tabId).value   = profile.credentials || '';
+    }
+
+    function saveJndiProfile(tabId) {
+        const factory     = document.getElementById('jndiFactory-'   + tabId)?.value.trim() || '';
+        const url         = document.getElementById('jndiUrl-'       + tabId)?.value.trim() || '';
+        const principal   = document.getElementById('jndiPrincipal-' + tabId)?.value.trim() || '';
+        const credentials = document.getElementById('jndiCreds-'     + tabId)?.value        || '';
+        const sel         = document.getElementById('jndiSelect-'    + tabId);
+        const name = prompt('プロファイル名を入力してください', sel?.value || '');
+        if (!name || !name.trim()) return;
+        const profiles = getJndiProfiles();
+        const idx = profiles.findIndex(p => p.name === name.trim());
+        const profile = { name: name.trim(), factory, url, principal, credentials };
+        if (idx >= 0) profiles[idx] = profile; else profiles.push(profile);
+        _saveJndiProfiles(profiles);
+        tabs.forEach(t => renderJndiProfileOptions(t.id));
+        if (sel) sel.value = name.trim();
+    }
+
+    function deleteJndiProfile(tabId) {
+        const sel  = document.getElementById('jndiSelect-' + tabId);
+        const name = sel ? sel.value : '';
+        if (!name || !confirm(`プロファイル "${name}" を削除しますか？`)) return;
+        _saveJndiProfiles(getJndiProfiles().filter(p => p.name !== name));
+        tabs.forEach(t => renderJndiProfileOptions(t.id));
+    }
+
+    function getJndiDataForTab(tabId) {
+        const factory     = document.getElementById('jndiFactory-'   + tabId)?.value.trim();
+        const url         = document.getElementById('jndiUrl-'       + tabId)?.value.trim();
+        const principal   = document.getElementById('jndiPrincipal-' + tabId)?.value.trim();
+        const credentials = document.getElementById('jndiCreds-'     + tabId)?.value;
+        if (!factory && !url) return null;
+        return {
+            'java.naming.factory.initial':    factory     || '',
+            'java.naming.provider.url':        url         || '',
+            'java.naming.security.principal':  principal   || '',
+            'java.naming.security.credentials': credentials || ''
+        };
+    }
+
+    /* ── 抽出リスト ───────────────────────────── */
+    let extractionRows = [];   // [{source:'all', key:'', value:''}]
+    let extractionVisible = false;
+
+    function toggleExtractionPanel() {
+        extractionVisible = !extractionVisible;
+        document.getElementById('extractionPanel').style.display = extractionVisible ? 'block' : 'none';
+        const arrow = document.getElementById('extractionToggleArrow');
+        arrow.classList.toggle('open', extractionVisible);
+        if (extractionVisible && extractionRows.length === 0) {
+            addExtractionRow();
+        }
+    }
+
+    function addExtractionRow(source, key, value) {
+        extractionRows.push({ source: source || 'all', key: key || '', value: value || '' });
+        renderExtractionRows();
+    }
+
+    function removeExtractionRow(idx) {
+        extractionRows.splice(idx, 1);
+        renderExtractionRows();
+    }
+
+    function clearExtractionValue(idx) {
+        extractionRows[idx].value = '';
+        renderExtractionRows();
+    }
+
+    function saveExtractionSource(idx, v) { extractionRows[idx].source = v; }
+    function saveExtractionKey(idx, v)    { extractionRows[idx].key    = v; }
+    function saveExtractionValue(idx, v)  { extractionRows[idx].value  = v; }
+
+    function renderExtractionRows() {
+        const tbody = document.getElementById('extractionRows');
+        tbody.innerHTML = '';
+        extractionRows.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            const srcOpts = ['all', 'request', 'response'].map(s =>
+                `<option value="${s}" ${row.source === s ? 'selected' : ''}>${s}</option>`
+            ).join('');
+            tr.innerHTML = `
+                <td class="ex-td">
+                    <select class="ex-select-src" onchange="saveExtractionSource(${idx}, this.value)">${srcOpts}</select>
+                </td>
+                <td class="ex-td">
+                    <input class="ex-input-key" type="text" value="${escHtml(row.key)}"
+                           placeholder="フィールド名（例: data.customerId）"
+                           oninput="saveExtractionKey(${idx}, this.value)"
+                           onkeydown="if(event.key==='Enter') extractField(${idx})">
+                </td>
+                <td class="ex-td">
+                    <input class="ex-input-val" type="text" value="${escHtml(row.value)}"
+                           placeholder="（抽出で追記、手動入力も可）"
+                           oninput="saveExtractionValue(${idx}, this.value)">
+                </td>
+                <td class="ex-td">
+                    <div class="ex-actions">
+                        <button class="btn-ex-extract" onclick="extractField(${idx})" title="アクティブタブのJSONから抽出・追記">抽出</button>
+                        <button class="btn-ex-clr"     onclick="clearExtractionValue(${idx})" title="Valueをクリア">CLR</button>
+                        <button class="btn-ex-del"     onclick="removeExtractionRow(${idx})" title="行削除">&times;</button>
+                    </div>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* JSON から指定キーの値を取り出す
+       - 通常:  "data.customerId"  → 指定パスを辿る
+       - 再帰:  "..customerId"     → 全階層を再帰検索して全件返す */
+    function extractFromJson(jsonStr, fieldKey) {
+        let obj;
+        try { obj = JSON.parse(jsonStr); } catch { return null; }
+        if (!obj || typeof obj !== 'object') return null;
+
+        // ..key → 再帰検索モード
+        if (fieldKey.startsWith('..')) {
+            const key = fieldKey.slice(2);
+            const results = [];
+            collectDeep(obj, key, results);
+            if (results.length === 0) return null;
+            return results.map(flattenValue).join(', ');
+        }
+
+        // ドット区切りパス解決
+        const parts = fieldKey.split('.');
+        let cur = obj;
+        for (const p of parts) {
+            if (cur === null || cur === undefined) return null;
+            if (Array.isArray(cur)) {
+                const vals = cur.map(el => (el && typeof el === 'object') ? el[p] : undefined)
+                               .filter(v => v !== undefined);
+                cur = vals.length === 1 ? vals[0] : vals;
+            } else {
+                cur = cur[p];
+            }
+        }
+        if (cur === undefined || cur === null) return null;
+        if (Array.isArray(cur)) return cur.map(flattenValue).join(', ');
+        return flattenValue(cur);
+    }
+
+    /* 再帰的に全階層からキーを収集 */
+    function collectDeep(node, key, results) {
+        if (Array.isArray(node)) {
+            node.forEach(el => collectDeep(el, key, results));
+        } else if (node && typeof node === 'object') {
+            if (Object.prototype.hasOwnProperty.call(node, key)) {
+                const v = node[key];
+                if (Array.isArray(v)) v.forEach(el => results.push(el));
+                else results.push(v);
+            }
+            Object.values(node).forEach(v => {
+                if (v && typeof v === 'object') collectDeep(v, key, results);
+            });
+        }
+    }
+
+    function flattenValue(v) {
+        if (v === null || v === undefined) return '';
+        if (typeof v === 'object') return JSON.stringify(v);
+        return String(v);
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function extractField(idx) {
+        const row = extractionRows[idx];
+        if (!row || !row.key.trim()) return;
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+
+        const reqJson = tab.inputEditor  ? tab.inputEditor.getValue()  : '';
+        const resJson = tab.outputEditor ? tab.outputEditor.getValue() : '';
+        const key     = row.key.trim();
+
+        // Source 設定に従って検索
+        const candidates = [];
+        if (row.source === 'request') {
+            const v = extractFromJson(reqJson, key);
+            if (v !== null) candidates.push(v);
+        } else if (row.source === 'response') {
+            const v = extractFromJson(resJson, key);
+            if (v !== null) candidates.push(v);
+        } else {
+            // all: request・response 両方から抽出してマージ
+            const vReq = extractFromJson(reqJson, key);
+            const vRes = extractFromJson(resJson, key);
+            if (vReq !== null) candidates.push(vReq);
+            if (vRes !== null) candidates.push(vRes);
+        }
+
+        if (candidates.length === 0) return;  // 見つからなければ Value は変えない
+
+        // 既存値に重複なし追記（カンマ区切り）
+        const newVals  = candidates.flatMap(c => c.split(',').map(s => s.trim())).filter(Boolean);
+        const existing = row.value ? row.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const merged   = [...existing];
+        for (const v of newVals) {
+            if (!merged.includes(v)) merged.push(v);
+        }
+        row.value = merged.join(', ');
+        renderExtractionRows();
+    }
+
+    /* ── テストエビデンス出力 ─────────────────── */
+    function exportEvidence() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+        const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+        const displayTime = `${dateStr} ${timeStr.replace(/-/g, ':')}`;
+
+        const selectedTabs = tabs.filter(t => t.selected !== false);
+        if (selectedTabs.length === 0) {
+            setStatus('error', 'エビデンス出力対象のタブが選択されていません');
+            return;
+        }
+
+        const evidenceTitle   = document.getElementById('evidenceTitle').value.trim() || 'テストエビデンス';
+        const evidenceComment = document.getElementById('evidenceComment').value.trim();
+        const dtoNames = selectedTabs.map(t => t.dtoName.replace(/[\\/:*?"<>|]/g, '-')).join('_');
+        const fileName = `${evidenceTitle.replace(/[\\/:*?"<>|]/g, '-')}_${dtoNames}_${dateStr}_${timeStr}.html`;
+
+        const e = s => String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        const cases = selectedTabs.map(tab => {
+            const reqJson        = tab.inputEditor  ? tab.inputEditor.getValue()  : '';
+            const resJson        = tab.outputEditor ? tab.outputEditor.getValue() : '';
+            const reqToString    = tab._requestToString  || '';
+            const resToString    = tab._responseToString || '';
+            const httpStatus     = tab._httpStatus     || '';
+            const httpStatusText = tab._httpStatusText || '';
+            const respTime       = tab._respTime != null ? tab._respTime + ' ms' : '';
+            const timestamp      = tab._timestamp || '(未実行)';
+            const reqLogs        = (tab._logs && tab._logs.req.length) ? tab._logs.req.join('\n') : '';
+            const resLogs        = (tab._logs && tab._logs.res.length) ? tab._logs.res.join('\n') : '';
+            const tabMemo        = tab.memo || '';
+            const tabDisplayName = tab.label || `#${tab.number} ${tab.dtoName}`;
+            const statusClass    = httpStatus >= 200 && httpStatus < 300 ? 'status-ok'
+                                 : httpStatus ? 'status-err' : 'status-none';
+
+            const memoBlock = tabMemo
+                ? `<details open><summary>メモ</summary><pre class="memo-pre">${e(tabMemo)}</pre></details>`
+                : '';
+            const reqTsBlock = reqToString
+                ? `<details open><summary>Request toString</summary><pre>${e(reqToString)}</pre></details>`
+                : '';
+            const resTosBlock = resToString
+                ? `<details open><summary>Response toString</summary><pre>${e(resToString)}</pre></details>`
+                : '';
+            const reqLogBlock = reqLogs
+                ? `<details open><summary>Request Log</summary><div class="log-area">${e(reqLogs)}</div></details>`
+                : '';
+            const resLogBlock = resLogs
+                ? `<details open><summary>Response Log</summary><div class="log-area">${e(resLogs)}</div></details>`
+                : '';
+
+            return `
+<div class="test-case">
+  <div class="test-case-header">
+    <span>${e(tabDisplayName)}</span>
+    <span style="font-weight:normal;font-size:11px;">実行: ${e(timestamp)}</span>
+  </div>
+  <div class="test-case-body">
+    <div class="status-row">
+      <div class="status-item">
+        <span class="status-label">HTTP Status:</span>
+        <span class="${statusClass}">${httpStatus ? e(httpStatus + ' ' + httpStatusText) : '(未実行)'}</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">応答時間:</span>
+        <span>${e(respTime || '-')}</span>
+      </div>
+    </div>
+    <details open><summary>Request JSON</summary><pre>${e(reqJson)}</pre></details>
+    <details open><summary>Response JSON</summary><pre>${e(resJson)}</pre></details>
+    ${reqTsBlock}
+    ${resTosBlock}
+    ${memoBlock}
+    ${reqLogBlock}
+    ${resLogBlock}
+  </div>
+</div>`;
+        }).join('\n');
+
+        const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>${e(evidenceTitle)} ${displayTime}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Meiryo',sans-serif; margin:24px; color:#1e1e1e; background:#fff; font-size:13px; }
+h1 { font-size:20px; border-bottom:3px solid #007acc; padding-bottom:10px; margin-bottom:6px; color:#007acc; }
+.meta { font-size:12px; color:#666; margin-bottom:8px; }
+.global-comment { font-size:12px; color:#444; background:#f9f9f9; border-left:3px solid #007acc; padding:6px 12px; margin-bottom:20px; white-space:pre-wrap; }
+.memo-pre { background:#fffde7; border:1px solid #f0e68c; padding:8px 12px; font-size:11px; font-family:Consolas,'Courier New',monospace; line-height:1.6; border-radius:3px; white-space:pre-wrap; word-break:break-all; margin-top:4px; }
+.test-case { border:1px solid #ccc; margin-bottom:20px; border-radius:4px; }
+.test-case-header { background:#007acc; color:#fff; padding:8px 14px; font-weight:bold; font-size:13px; display:flex; justify-content:space-between; align-items:center; border-radius:3px 3px 0 0; }
+.test-case-body { padding:14px; }
+.status-row { display:flex; gap:28px; margin-bottom:10px; font-size:12px; }
+.status-item { display:flex; align-items:center; gap:6px; }
+.status-label { color:#888; }
+.status-ok { color:#2e7d32; font-weight:bold; }
+.status-err { color:#c62828; font-weight:bold; }
+.status-none { color:#999; }
+details { margin-top:8px; }
+details:first-of-type { margin-top:0; }
+summary { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; padding:4px 0; user-select:none; }
+summary:hover { color:#007acc; }
+pre { background:#f5f5f5; border:1px solid #ddd; padding:10px 12px; font-size:11px; font-family:Consolas,'Courier New',monospace; line-height:1.6; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; max-height:320px; margin-top:4px; }
+.log-area { background:#1e1e1e; color:#d4d4d4; padding:8px 12px; font-size:10px; font-family:Consolas,monospace; line-height:1.5; max-height:160px; overflow:auto; border-radius:3px; white-space:pre-wrap; word-break:break-all; margin-top:4px; }
+@media print {
+  body { margin:10px; }
+  .test-case { page-break-inside:avoid; }
+  details { open:true; }
+  pre { max-height:none !important; }
+  .log-area { max-height:none !important; }
+}
+</style>
+</head>
+<body>
+<h1>&#128196; ${e(evidenceTitle)}</h1>
+<div class="meta">出力日時: ${displayTime}&nbsp;&nbsp;|&nbsp;&nbsp;テストケース数: ${selectedTabs.length} 件</div>
+${evidenceComment ? `<div class="global-comment">${e(evidenceComment)}</div>` : ''}
+${cases}
+</body>
+</html>`;
+
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        setStatus('success', `エビデンス出力完了: ${fileName}`);
+    }
+
+    /* ── ユーティリティ ───────────────────────── */
     function setStatus(type, msg) {
         const bar = document.getElementById('statusBar');
+        bar.className = 'status-bar';
+        if (!msg) { bar.textContent = '✓ Ready'; return; }
         bar.textContent = msg;
-        bar.className   = 'status-bar';
         if (type === 'error')   bar.classList.add('s-error');
         if (type === 'success') bar.classList.add('s-success');
         if (type === 'loading') bar.classList.add('s-loading');
@@ -450,9 +2547,12 @@
     document.addEventListener('keydown', e => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
-            sendRequest();
+            sendRequestFromActiveTab();
         }
     });
+
+    /* ── 初期タブ作成 ────────────────────────── */
+    addNewTab('Default');
 </script>
 </body>
 </html>
