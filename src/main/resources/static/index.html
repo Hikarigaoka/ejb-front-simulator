@@ -466,6 +466,133 @@
         .btn-ex-add:hover { border-color: var(--accent); color: var(--text-primary); }
         .extraction-hint { font-size: 11px; color: var(--text-secondary); opacity: 0.7; }
 
+        /* ── 履歴サイドバー ──────────────────────── */
+        .main-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .history-sidebar {
+            width: 230px;
+            min-width: 230px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.15s, min-width 0.15s;
+            flex-shrink: 0;
+        }
+        .history-sidebar.collapsed { width: 0; min-width: 0; }
+        .hist-header {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-secondary);
+            flex-shrink: 0;
+            gap: 6px;
+        }
+        .hist-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            white-space: nowrap;
+        }
+        .btn-hist-clear-all {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: transparent;
+            border: 1px solid var(--border-input);
+            color: var(--text-muted);
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-hist-clear-all:hover { color: var(--c-err); border-color: var(--c-err); background: rgba(255,50,50,0.1); }
+        .hist-search {
+            margin: 5px 8px;
+            flex-shrink: 0;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 11px;
+            outline: none;
+            width: calc(100% - 16px);
+        }
+        .hist-search:focus { border-color: var(--accent); }
+        .hist-list { flex: 1; overflow-y: auto; }
+        .hist-empty { padding: 16px 10px; font-size: 11px; color: var(--text-muted); text-align: center; }
+        .hist-entry {
+            position: relative;
+            padding: 6px 28px 6px 10px;
+            border-bottom: 1px solid var(--border-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+        .hist-entry:hover { background: var(--bg-tertiary); }
+        .hist-entry-top { display: flex; align-items: center; gap: 5px; margin-bottom: 2px; }
+        .hist-dto {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-keyword);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .hist-badge {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .hist-badge.ok  { background: rgba(78,201,176,0.15); color: var(--c-ok); }
+        .hist-badge.err { background: rgba(244,71,71,0.15);  color: var(--c-err); }
+        .hist-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 2px;
+        }
+        .hist-meta { display: flex; align-items: center; font-size: 10px; color: var(--text-muted); }
+        .hist-time { margin-left: auto; }
+        .btn-hist-del {
+            position: absolute;
+            top: 5px; right: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 3px;
+            line-height: 1;
+            display: none;
+        }
+        .hist-entry:hover .btn-hist-del { display: block; }
+        .btn-hist-del:hover { background: rgba(255,50,50,0.2); color: var(--c-err); }
+        .btn-hist-toggle {
+            background: #2a3a5c; border: 1px solid #4a6a9a; color: #a0c0ff;
+        }
+        .btn-hist-toggle:hover { background: #3a4a7a; }
+        .btn-hist-toggle.active { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .light-theme .btn-hist-toggle { background: #e0ecff; border-color: #6a9acc; color: #1a4a7a; }
+
         .req-tab .tab-close {
             font-size: 14px;
             line-height: 1;
@@ -713,6 +840,13 @@
 
     <div class="toolbar-sep"></div>
 
+    <button id="histToggleBtn" class="btn btn-hist-toggle" onclick="toggleHistorySidebar()" title="履歴サイドバーを表示/非表示">
+        <span>&#x1F551;</span>
+        <span>履歴</span>
+    </button>
+
+    <div class="toolbar-sep"></div>
+
     <button class="btn btn-extract-toggle" onclick="toggleExtractionPanel()" title="抽出リストを表示/非表示">
         <span>&#x1F4CB;</span>
         <span>抽出リスト</span>
@@ -741,15 +875,36 @@
     </div>
 </div>
 
-<!-- ─── リクエストI/F タブバー ───────────────────── -->
-<div class="request-tabs-bar" id="requestTabsBar">
-    <!-- 動的に生成 -->
-    <div class="add-tab-btn" onclick="addNewTab()" title="タブを追加">+</div>
-</div>
+<!-- ─── メインエリア ─────────────────────────────── -->
+<div class="main-area">
 
-<!-- ─── エディター ───────────────────────────────── -->
-<div class="editors-area" id="editorsArea">
-    <!-- 動的に生成される -->
+    <!-- 履歴サイドバー -->
+    <div class="history-sidebar collapsed" id="historySidebar">
+        <div class="hist-header">
+            <span class="hist-title">&#x1F551; 履歴</span>
+            <button class="btn-hist-clear-all" onclick="clearAllHistory()">全削除</button>
+        </div>
+        <input class="hist-search" id="histSearch" type="text"
+               placeholder="&#x1F50D; 絞り込み..." oninput="renderHistoryList()">
+        <div class="hist-list" id="histList">
+            <div class="hist-empty">履歴がありません</div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <!-- ─── リクエストI/F タブバー ───────────────────── -->
+        <div class="request-tabs-bar" id="requestTabsBar">
+            <!-- 動的に生成 -->
+            <div class="add-tab-btn" onclick="addNewTab()" title="タブを追加">+</div>
+        </div>
+
+        <!-- ─── エディター ───────────────────────────────── -->
+        <div class="editors-area" id="editorsArea">
+            <!-- 動的に生成される -->
+        </div>
+    </div>
+
 </div>
 
 <!-- ─── ステータスバー ──────────────────────────── -->
@@ -1348,6 +1503,7 @@
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<span>&#9654;</span><span>Send</span>';
+            addToHistory(tab);
         }
     }
 
@@ -1534,6 +1690,104 @@
     function saveTabMemo(id, value) {
         const tab = tabs.find(t => t.id === id);
         if (tab) tab.memo = value;
+    }
+
+    /* ── 履歴 ─────────────────────────────────── */
+    const HIST_KEY = 'ejb-history';
+    const HIST_MAX = 200;
+    let historyOpen = false;
+
+    function _loadHistEntries() {
+        try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
+        catch { return []; }
+    }
+    function _saveHistEntries(arr) {
+        localStorage.setItem(HIST_KEY, JSON.stringify(arr));
+    }
+
+    function addToHistory(tab) {
+        const entries = _loadHistEntries();
+        const label = tab.label || `#${tab.number} ${tab.dtoName}`;
+        entries.unshift({
+            id:         'h' + Date.now(),
+            ts:         new Date().toISOString(),
+            dtoName:    tab.dtoName,
+            label:      label,
+            reqJson:    tab.inputEditor  ? tab.inputEditor.getValue()  : '',
+            resJson:    tab.outputEditor ? tab.outputEditor.getValue() : '',
+            httpStatus: tab._httpStatus || null,
+            respTime:   tab._respTime   || null,
+        });
+        if (entries.length > HIST_MAX) entries.length = HIST_MAX;
+        _saveHistEntries(entries);
+        if (historyOpen) renderHistoryList();
+    }
+
+    function deleteHistoryEntry(id, e) {
+        e.stopPropagation();
+        _saveHistEntries(_loadHistEntries().filter(h => h.id !== id));
+        renderHistoryList();
+    }
+
+    function clearAllHistory() {
+        if (!confirm('履歴を全件削除しますか？')) return;
+        _saveHistEntries([]);
+        renderHistoryList();
+    }
+
+    function loadFromHistory(id) {
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (!tab) return;
+        const entry = _loadHistEntries().find(h => h.id === id);
+        if (!entry) return;
+        if (tab.inputEditor  && entry.reqJson) tab.inputEditor.setValue(entry.reqJson);
+        if (tab.outputEditor && entry.resJson) tab.outputEditor.setValue(entry.resJson);
+        setStatus('info', `履歴ロード: ${entry.label}`);
+    }
+
+    function renderHistoryList() {
+        const list = document.getElementById('histList');
+        if (!list) return;
+        const query   = (document.getElementById('histSearch')?.value || '').toLowerCase();
+        const entries = _loadHistEntries().filter(h =>
+            !query ||
+            h.dtoName.toLowerCase().includes(query) ||
+            h.label.toLowerCase().includes(query)
+        );
+        if (entries.length === 0) {
+            list.innerHTML = '<div class="hist-empty">履歴がありません</div>';
+            return;
+        }
+        list.innerHTML = entries.map(h => {
+            const d       = new Date(h.ts);
+            const dateStr = d.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
+            const timeStr = d.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const ok      = h.httpStatus && h.httpStatus < 400;
+            const badge   = h.httpStatus
+                ? `<span class="hist-badge ${ok ? 'ok' : 'err'}">${h.httpStatus}</span>` : '';
+            const timeTag = h.respTime != null ? `<span class="hist-time">${h.respTime} ms</span>` : '';
+            return `
+            <div class="hist-entry" onclick="loadFromHistory('${h.id}')">
+                <button class="btn-hist-del" onclick="deleteHistoryEntry('${h.id}',event)" title="削除">&times;</button>
+                <div class="hist-entry-top">
+                    <span class="hist-dto">${escHtml(h.dtoName)}</span>
+                    ${badge}
+                </div>
+                <div class="hist-label">${escHtml(h.label)}</div>
+                <div class="hist-meta">
+                    <span>${dateStr} ${timeStr}</span>
+                    ${timeTag}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleHistorySidebar() {
+        historyOpen = !historyOpen;
+        const sidebar = document.getElementById('historySidebar');
+        sidebar.classList.toggle('collapsed', !historyOpen);
+        document.getElementById('histToggleBtn').classList.toggle('active', historyOpen);
+        if (historyOpen) renderHistoryList();
     }
 
     /* ── 抽出リスト ───────────────────────────── */
