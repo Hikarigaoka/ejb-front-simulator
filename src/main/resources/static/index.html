@@ -891,6 +891,43 @@
                 grid-template-columns: max-content 1fr;
             }
         }
+
+        /* ── HTTP URL バー ──────────────────────── */
+        .http-url-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+        .http-url-bar.hidden { display: none; }
+        .http-method-select {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            min-width: 72px;
+            cursor: pointer;
+        }
+        .http-url-input {
+            flex: 1;
+            font-size: 12px;
+            padding: 3px 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            font-family: var(--font-mono, monospace);
+        }
+        .http-url-input:focus { outline: 1px solid var(--accent); }
+
+        /* ── ツールバー EJB リボン ──────────────── */
+        #toolbarEjbRibbon { display: contents; }
+        #toolbarEjbRibbon.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -911,21 +948,24 @@
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
     <!-- ── 行1: API操作 ── -->
-    <span class="toolbar-label">API:</span>
+    <!-- EJB モード専用リボン (HTTP モード時は非表示) -->
+    <span id="toolbarEjbRibbon">
+        <span class="toolbar-label">API:</span>
 
-    <input id="dtoSearch" class="dto-search" type="text"
-           placeholder="&#x1F50D; DTO検索..." oninput="filterDtoList()">
+        <input id="dtoSearch" class="dto-search" type="text"
+               placeholder="&#x1F50D; DTO検索..." oninput="filterDtoList()">
 
-    <select id="dtoSelect" class="dto-select">
-        <option value="">-- loading... --</option>
-    </select>
+        <select id="dtoSelect" class="dto-select">
+            <option value="">-- loading... --</option>
+        </select>
 
-    <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchemaToActiveTab()">
-        <span>&#x27a1;</span>
-        <span>DTO to JSON</span>
-    </button>
+        <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchemaToActiveTab()">
+            <span>&#x27a1;</span>
+            <span>DTO to JSON</span>
+        </button>
 
-    <div class="toolbar-sep"></div>
+        <div class="toolbar-sep"></div>
+    </span>
 
     <button id="requestBtn" class="btn btn-request" onclick="sendRequestFromActiveTab()">
         <span>&#9654;</span>
@@ -1231,6 +1271,9 @@
         }
 
         contentEl.style.display = 'flex';
+
+        // グローバルツールバーをアクティブタブのモードに合わせる
+        updateToolbarForActiveTab();
     }
 
     function createTabContent(tab) {
@@ -1243,6 +1286,21 @@
         div.style.flexDirection = 'column';
 
         div.innerHTML = `
+        <!-- HTTP URL バー (HTTPタブのみ表示) -->
+        <div class="http-url-bar${tab.type !== 'http' ? ' hidden' : ''}" id="httpUrlBar-${tab.id}">
+            <select class="http-method-select" id="httpMethod-${tab.id}"
+                    onchange="onHttpUrlBarChange('${tab.id}')">
+                <option>GET</option>
+                <option selected>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+            </select>
+            <input class="http-url-input" id="httpUrlInput-${tab.id}"
+                   type="text" placeholder="https://"
+                   oninput="onHttpUrlBarChange('${tab.id}')">
+        </div>
+
         <!-- JNDI 接続プロファイルパネル (EJBタブのみ表示) -->
         <div class="jndi-panel${tab.type !== 'ejb' ? ' hidden' : ''}" id="jndiPanel-${tab.id}">
             <div class="jndi-panel-header" onclick="toggleJndiPanel('${tab.id}')">
@@ -2001,9 +2059,53 @@
         if (respHttpStatus) respHttpStatus.textContent = '';
         if (respTime) respTime.textContent = '';
 
-        // JNDI パネルの表示切り替え
+        // JNDI パネル: EJB のみ表示
         const jndiPanel = document.getElementById('jndiPanel-' + tabId);
         if (jndiPanel) jndiPanel.classList.toggle('hidden', type !== 'ejb');
+
+        // HTTP URL バー: HTTP のみ表示
+        const httpUrlBar = document.getElementById('httpUrlBar-' + tabId);
+        if (httpUrlBar) {
+            httpUrlBar.classList.toggle('hidden', type !== 'http');
+            if (type === 'http') syncUrlBarFromEditor(tabId);
+        }
+
+        // グローバルツールバーの EJB リボン表示切り替え
+        updateToolbarForActiveTab();
+    }
+
+    /* ── ツールバー EJB/HTTP 切り替え ─────────── */
+    function updateToolbarForActiveTab() {
+        const tab = tabs.find(t => t.id === activeTabId);
+        const ribbon = document.getElementById('toolbarEjbRibbon');
+        if (!ribbon) return;
+        ribbon.classList.toggle('hidden', tab ? tab.type === 'http' : false);
+    }
+
+    /* ── HTTP URL バー ↔ JSON エディター同期 ── */
+    function syncUrlBarFromEditor(tabId) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || !tab.inputEditor) return;
+        try {
+            const body = JSON.parse(tab.inputEditor.getValue());
+            const methodEl = document.getElementById('httpMethod-' + tabId);
+            const urlEl    = document.getElementById('httpUrlInput-' + tabId);
+            if (methodEl && body.method) methodEl.value = body.method;
+            if (urlEl    && body.url   ) urlEl.value    = body.url;
+        } catch (e) { /* JSON 未確定時は無視 */ }
+    }
+
+    function onHttpUrlBarChange(tabId) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || !tab.inputEditor) return;
+        const method = document.getElementById('httpMethod-'   + tabId)?.value || 'GET';
+        const url    = document.getElementById('httpUrlInput-' + tabId)?.value || '';
+        try {
+            const body = JSON.parse(tab.inputEditor.getValue());
+            body.method = method;
+            body.url    = url;
+            tab.inputEditor.setValue(JSON.stringify(body, null, 2));
+        } catch (e) { /* JSON が壊れているときは上書きしない */ }
     }
 
     /* ── JNDI プロファイル管理 ─────────────────── */
