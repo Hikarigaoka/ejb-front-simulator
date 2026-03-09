@@ -663,10 +663,10 @@
         /* パネルヘッダー */
         .panel-header {
             background: var(--bg-secondary);
-            height: 28px;
+            min-height: 34px;
             display: flex;
             align-items: center;
-            padding: 0 12px;
+            padding: 0 8px 0 12px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
@@ -674,6 +674,55 @@
             letter-spacing: 0.5px;
             flex-shrink: 0;
             border-bottom: 1px solid var(--border-secondary);
+            gap: 4px;
+        }
+        .panel-title { flex-shrink: 0; white-space: nowrap; }
+        .panel-vsep {
+            width: 1px; height: 14px;
+            background: var(--border-secondary);
+            flex-shrink: 0; margin: 0 4px;
+        }
+        .panel-api-ribbon {
+            display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+        }
+        .panel-api-ribbon.hidden { display: none; }
+        .panel-api-label {
+            color: var(--text-muted); font-size: 10px; font-weight: 600;
+            white-space: nowrap; text-transform: uppercase;
+        }
+        .dto-search-inline {
+            font-size: 10px; padding: 2px 5px; width: 90px;
+            background: var(--bg-input); color: var(--text-primary);
+            border: 1px solid var(--border-input); border-radius: 3px;
+        }
+        .dto-select-inline {
+            font-size: 10px; padding: 2px 4px; width: 150px;
+            background: var(--bg-input); color: var(--text-primary);
+            border: 1px solid var(--border-input); border-radius: 3px;
+        }
+        .btn-panel {
+            font-size: 10px; font-weight: 600; padding: 3px 9px;
+            border-radius: 3px; border: 1px solid transparent;
+            cursor: pointer; display: inline-flex; align-items: center;
+            gap: 3px; white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-panel-schema {
+            background: var(--btn-schema-bg); color: var(--btn-schema-fg);
+        }
+        .btn-panel-schema:hover  { background: var(--btn-schema-hover); }
+        .btn-panel-schema:disabled { opacity: 0.5; cursor: default; }
+        .btn-panel-send {
+            background: var(--btn-send-bg); color: var(--btn-send-fg);
+        }
+        .btn-panel-send:hover    { background: var(--btn-send-hover); }
+        .btn-panel-send:disabled { opacity: 0.5; cursor: default; }
+        .btn-panel-clear {
+            background: transparent; color: var(--text-muted);
+            border-color: var(--border-input);
+        }
+        .btn-panel-clear:hover { background: var(--bg-input); }
+        .panel-actions {
+            margin-left: auto; display: flex; align-items: center; gap: 4px;
         }
 
         /* サブタブ (JSON / toString / Log) */
@@ -865,32 +914,33 @@
         }
         .jndi-profile-row .jndi-btn:hover { background: var(--bg-tertiary); }
         .jndi-profile-row .jndi-btn.del:hover { background: var(--btn-danger-bg); color: var(--btn-danger-fg); }
-        .jndi-fields-grid {
-            display: grid;
-            grid-template-columns: max-content 1fr max-content 1fr;
-            gap: 4px 10px;
+        .jndi-fields-row {
+            display: flex;
             align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
         }
-        .jndi-fields-grid label {
+        .jndi-fields-row label {
             color: var(--text-muted);
             font-size: 10px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
-        .jndi-fields-grid input {
+        .jndi-fields-row input {
             font-size: 11px;
             padding: 2px 6px;
             background: var(--bg-input);
             color: var(--text-primary);
             border: 1px solid var(--border-input);
             border-radius: 3px;
-            width: 100%;
+            flex-shrink: 0;
             box-sizing: border-box;
         }
-        @media (max-width: 900px) {
-            .jndi-fields-grid {
-                grid-template-columns: max-content 1fr;
-            }
-        }
+        .jndi-fields-row input.w-factory  { width: 230px; }
+        .jndi-fields-row input.w-url      { width: 150px; }
+        .jndi-fields-row input.w-user     { width: 90px; }
+        .jndi-fields-row input.w-password { width: 110px; }
 
         /* ── HTTP URL バー ──────────────────────── */
         .http-url-bar {
@@ -947,44 +997,7 @@
 
 <!-- ─── ツールバー ───────────────────────────────── -->
 <div class="toolbar">
-    <!-- ── 行1: API操作 ── -->
-    <!-- EJB モード専用リボン (HTTP モード時は非表示) -->
-    <span id="toolbarEjbRibbon">
-        <span class="toolbar-label">API:</span>
-
-        <input id="dtoSearch" class="dto-search" type="text"
-               placeholder="&#x1F50D; DTO検索..." oninput="filterDtoList()">
-
-        <select id="dtoSelect" class="dto-select">
-            <option value="">-- loading... --</option>
-        </select>
-
-        <button id="schemaBtn" class="btn btn-schema" onclick="loadDtoSchemaToActiveTab()">
-            <span>&#x27a1;</span>
-            <span>DTO to JSON</span>
-        </button>
-
-        <div class="toolbar-sep"></div>
-    </span>
-
-    <button id="requestBtn" class="btn btn-request" onclick="sendRequestFromActiveTab()">
-        <span>&#9654;</span>
-        <span>Send</span>
-    </button>
-
-    <span class="kbd-hint">Ctrl+Enter</span>
-
-    <div class="toolbar-sep"></div>
-
-    <button class="btn btn-clear" onclick="clearActiveTab()">
-        <span>&#x2715;</span>
-        <span>Clear</span>
-    </button>
-
-    <!-- ── 行区切り ── -->
-    <div class="toolbar-break"></div>
-
-    <!-- ── 行2: 記録・抽出 ── -->
+    <!-- ── 記録・抽出 ── -->
     <span class="toolbar-label">記録:</span>
 
     <input type="text" id="evidenceTitle" class="evidence-title-input" value="テストエビデンス" placeholder="エビデンスタイトル" title="エビデンスのタイトル">
@@ -1113,13 +1126,17 @@
             allDtoList = await res.json();
             populateDtoSelect(allDtoList);
         } catch (e) {
-            document.getElementById('dtoSelect').innerHTML =
-                '<option value="">（取得エラー）</option>';
+            // エラー時は各タブに表示 (タブが存在すれば)
+            tabs.forEach(t => {
+                const sel = document.getElementById('dtoSelect-' + t.id);
+                if (sel) sel.innerHTML = '<option value="">（取得エラー）</option>';
+            });
         }
     });
 
-    function populateDtoSelect(list) {
-        const sel = document.getElementById('dtoSelect');
+    function populateDtoSelectForTab(tabId, list) {
+        const sel = document.getElementById('dtoSelect-' + tabId);
+        if (!sel) return;
         sel.innerHTML = '';
         if (list.length === 0) {
             sel.innerHTML = '<option value="">（該当なし）</option>';
@@ -1133,10 +1150,14 @@
         }
     }
 
-    function filterDtoList() {
-        const q = document.getElementById('dtoSearch').value.toLowerCase();
+    function populateDtoSelect(list) {
+        tabs.forEach(t => populateDtoSelectForTab(t.id, list));
+    }
+
+    function filterDtoList(tabId) {
+        const q = document.getElementById('dtoSearch-' + tabId)?.value.toLowerCase() || '';
         const filtered = allDtoList.filter(n => n.toLowerCase().includes(q));
-        populateDtoSelect(filtered);
+        populateDtoSelectForTab(tabId, filtered);
     }
 
     /* ── 行番号付きテキスト生成 ──────────────── */
@@ -1264,6 +1285,9 @@
             // JNDI プロファイル一覧を描画
             renderJndiProfileOptions(tab.id);
 
+            // DTO リストをこのタブに反映
+            populateDtoSelectForTab(tab.id, allDtoList);
+
             // Monaco エディター生成
             if (monacoReady) {
                 initTabEditors(tab);
@@ -1315,18 +1339,18 @@
                     <button class="jndi-btn" onclick="saveJndiProfile('${tab.id}')">保存</button>
                     <button class="jndi-btn del" onclick="deleteJndiProfile('${tab.id}')">削除</button>
                 </div>
-                <div class="jndi-fields-grid">
-                    <label>java.naming.factory.initial</label>
-                    <input id="jndiFactory-${tab.id}" type="text"
+                <div class="jndi-fields-row">
+                    <label>factory.initial</label>
+                    <input id="jndiFactory-${tab.id}" class="w-factory" type="text"
                            placeholder="weblogic.jndi.WLInitialContextFactory">
-                    <label>java.naming.provider.url</label>
-                    <input id="jndiUrl-${tab.id}" type="text"
+                    <label>provider.url</label>
+                    <input id="jndiUrl-${tab.id}" class="w-url" type="text"
                            placeholder="t3://localhost:7001">
-                    <label>java.naming.security.principal</label>
-                    <input id="jndiPrincipal-${tab.id}" type="text"
+                    <label>principal</label>
+                    <input id="jndiPrincipal-${tab.id}" class="w-user" type="text"
                            placeholder="admin">
-                    <label>java.naming.security.credentials</label>
-                    <input id="jndiCreds-${tab.id}" type="password"
+                    <label>credentials</label>
+                    <input id="jndiCreds-${tab.id}" class="w-password" type="password"
                            placeholder="password">
                 </div>
             </div>
@@ -1336,10 +1360,33 @@
             <!-- Request パネル -->
             <div class="editor-panel">
                 <div class="panel-header">
-                    <span>&#9654; Request</span>
-                    <div class="type-toggle" id="typeToggle-${tab.id}">
-                        <span class="type-btn ejb active" onclick="setTabType('${tab.id}','ejb')">EJB</span>
-                        <span class="type-btn http"       onclick="setTabType('${tab.id}','http')">HTTP</span>
+                    <span class="panel-title">&#9654; Request</span>
+                    <!-- EJB モード: API リボン -->
+                    <span class="panel-vsep"></span>
+                    <div class="panel-api-ribbon${tab.type !== 'ejb' ? ' hidden' : ''}"
+                         id="tabEjbRibbon-${tab.id}">
+                        <span class="panel-api-label">API:</span>
+                        <input id="dtoSearch-${tab.id}" class="dto-search-inline" type="text"
+                               placeholder="&#x1F50D; 検索…" oninput="filterDtoList('${tab.id}')">
+                        <select id="dtoSelect-${tab.id}" class="dto-select-inline">
+                            <option value="">-- DTO --</option>
+                        </select>
+                        <button id="schemaBtn-${tab.id}" class="btn-panel btn-panel-schema"
+                                onclick="loadDtoSchemaToActiveTab()">&#x27a1; DTO to JSON</button>
+                    </div>
+                    <!-- 右端: Send / Clear / モード切り替え -->
+                    <div class="panel-actions">
+                        <button id="requestBtn-${tab.id}" class="btn-panel btn-panel-send"
+                                onclick="sendRequestFromActiveTab()">&#9654; Send</button>
+                        <button class="btn-panel btn-panel-clear"
+                                onclick="clearActiveTab()">&#x2715; Clear</button>
+                        <span class="panel-vsep"></span>
+                        <div class="type-toggle" id="typeToggle-${tab.id}">
+                            <span class="type-btn ejb${tab.type === 'ejb' ? ' active' : ''}"
+                                  onclick="setTabType('${tab.id}','ejb')">EJB</span>
+                            <span class="type-btn http${tab.type === 'http' ? ' active' : ''}"
+                                  onclick="setTabType('${tab.id}','http')">HTTP</span>
+                        </div>
                     </div>
                 </div>
                 <div class="sub-tabs">
@@ -1554,15 +1601,15 @@
 
     /* ── DTO → JSON (アクティブタブに適用) ────── */
     async function loadDtoSchemaToActiveTab() {
-        const sel = document.getElementById('dtoSelect');
-        const className = sel.value;
-        if (!className) return;
-
         const tab = tabs.find(t => t.id === activeTabId);
         if (!tab) return;
 
-        const btn = document.getElementById('schemaBtn');
-        btn.disabled = true;
+        const sel = document.getElementById('dtoSelect-' + activeTabId);
+        const className = sel?.value;
+        if (!className) return;
+
+        const btn = document.getElementById('schemaBtn-' + activeTabId);
+        if (btn) btn.disabled = true;
         setStatus('loading', className + ' をロード中…');
 
         try {
@@ -1602,7 +1649,7 @@
         const tab = tabs.find(t => t.id === activeTabId);
         if (!tab || !tab.inputEditor) return;
 
-        const btn            = document.getElementById('requestBtn');
+        const btn            = document.getElementById('requestBtn-' + tab.id);
         const respHttpStatus = document.getElementById('respHttpStatus-' + tab.id);
         const respTime       = document.getElementById('respTime-' + tab.id);
 
@@ -1769,14 +1816,11 @@
         const tab = tabs.find(t => t.id === activeTabId);
         if (!tab) return;
 
-        // Request エディターをデフォルトに戻す
+        // Request エディターをモード別デフォルトに戻す
         if (tab.inputEditor) {
-            tab.inputEditor.setValue(JSON.stringify({
+            tab.inputEditor.setValue(tab.type === 'http' ? HTTP_TEMPLATE : JSON.stringify({
                 operationType: "getCustomer",
-                data: {
-                    customerId:    "C001",
-                    includeOrders: true
-                }
+                data: { customerId: "C001", includeOrders: true }
             }, null, 2));
         }
 
@@ -2070,17 +2114,13 @@
             if (type === 'http') syncUrlBarFromEditor(tabId);
         }
 
-        // グローバルツールバーの EJB リボン表示切り替え
-        updateToolbarForActiveTab();
+        // タブ内 EJB API リボン: EJB のみ表示
+        const tabEjbRibbon = document.getElementById('tabEjbRibbon-' + tabId);
+        if (tabEjbRibbon) tabEjbRibbon.classList.toggle('hidden', type !== 'ejb');
     }
 
-    /* ── ツールバー EJB/HTTP 切り替え ─────────── */
-    function updateToolbarForActiveTab() {
-        const tab = tabs.find(t => t.id === activeTabId);
-        const ribbon = document.getElementById('toolbarEjbRibbon');
-        if (!ribbon) return;
-        ribbon.classList.toggle('hidden', tab ? tab.type === 'http' : false);
-    }
+    /* ── (旧グローバルツールバー切り替え: 不要になったが互換のため残す) ── */
+    function updateToolbarForActiveTab() { /* no-op */ }
 
     /* ── HTTP URL バー ↔ JSON エディター同期 ── */
     function syncUrlBarFromEditor(tabId) {
