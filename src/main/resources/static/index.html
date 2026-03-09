@@ -802,6 +802,95 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── JNDI 接続プロファイルパネル ────────── */
+        .jndi-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 7px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+            font-size: 11px;
+        }
+        .jndi-panel.hidden { display: none; }
+        .jndi-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .jndi-panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+        }
+        .jndi-panel-arrow {
+            color: var(--text-muted);
+            font-size: 9px;
+            transition: transform 0.15s;
+        }
+        .jndi-panel-arrow.open { transform: rotate(90deg); }
+        .jndi-panel-body {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .jndi-panel-body.open { display: flex; }
+        .jndi-profile-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .jndi-profile-row select {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            min-width: 160px;
+        }
+        .jndi-profile-row .jndi-btn {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .jndi-profile-row .jndi-btn:hover { background: var(--bg-tertiary); }
+        .jndi-profile-row .jndi-btn.del:hover { background: var(--btn-danger-bg); color: var(--btn-danger-fg); }
+        .jndi-fields-grid {
+            display: grid;
+            grid-template-columns: max-content 1fr max-content 1fr;
+            gap: 4px 10px;
+            align-items: center;
+        }
+        .jndi-fields-grid label {
+            color: var(--text-muted);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+        .jndi-fields-grid input {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-input);
+            border-radius: 3px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        @media (max-width: 900px) {
+            .jndi-fields-grid {
+                grid-template-columns: max-content 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1132,6 +1221,9 @@
             contentEl = createTabContent(tab);
             area.appendChild(contentEl);
 
+            // JNDI プロファイル一覧を描画
+            renderJndiProfileOptions(tab.id);
+
             // Monaco エディター生成
             if (monacoReady) {
                 initTabEditors(tab);
@@ -1151,6 +1243,37 @@
         div.style.flexDirection = 'column';
 
         div.innerHTML = `
+        <!-- JNDI 接続プロファイルパネル (EJBタブのみ表示) -->
+        <div class="jndi-panel${tab.type !== 'ejb' ? ' hidden' : ''}" id="jndiPanel-${tab.id}">
+            <div class="jndi-panel-header" onclick="toggleJndiPanel('${tab.id}')">
+                <span class="jndi-panel-arrow" id="jndiArrow-${tab.id}">&#9658;</span>
+                <span class="jndi-panel-title">JNDI 接続設定</span>
+            </div>
+            <div class="jndi-panel-body" id="jndiBody-${tab.id}">
+                <div class="jndi-profile-row">
+                    <select id="jndiSelect-${tab.id}" onchange="loadJndiProfile('${tab.id}')">
+                        <option value="">-- プロファイル選択 --</option>
+                    </select>
+                    <button class="jndi-btn" onclick="saveJndiProfile('${tab.id}')">保存</button>
+                    <button class="jndi-btn del" onclick="deleteJndiProfile('${tab.id}')">削除</button>
+                </div>
+                <div class="jndi-fields-grid">
+                    <label>java.naming.factory.initial</label>
+                    <input id="jndiFactory-${tab.id}" type="text"
+                           placeholder="weblogic.jndi.WLInitialContextFactory">
+                    <label>java.naming.provider.url</label>
+                    <input id="jndiUrl-${tab.id}" type="text"
+                           placeholder="t3://localhost:7001">
+                    <label>java.naming.security.principal</label>
+                    <input id="jndiPrincipal-${tab.id}" type="text"
+                           placeholder="admin">
+                    <label>java.naming.security.credentials</label>
+                    <input id="jndiCreds-${tab.id}" type="password"
+                           placeholder="password">
+                </div>
+            </div>
+        </div>
+
         <div class="editors-row">
             <!-- Request パネル -->
             <div class="editor-panel">
@@ -1453,6 +1576,12 @@
         setStatus('loading', isHttp ? 'HTTP リクエスト送信中…' : 'EJB サービスを呼び出し中…');
         if (respHttpStatus) respHttpStatus.textContent = '';
         if (respTime) respTime.textContent = '';
+
+        // EJB タブのとき JNDI 接続情報をインジェクト
+        if (!isHttp) {
+            const jndi = getJndiDataForTab(tab.id);
+            if (jndi) body.jndi = jndi;
+        }
 
         if (isHttp) {
             addLog(tab, 'req', `[SEND] ${(body.method || 'GET').toUpperCase()} ${body.url || ''}`);
@@ -1871,6 +2000,90 @@
         const respTime       = document.getElementById('respTime-' + tabId);
         if (respHttpStatus) respHttpStatus.textContent = '';
         if (respTime) respTime.textContent = '';
+
+        // JNDI パネルの表示切り替え
+        const jndiPanel = document.getElementById('jndiPanel-' + tabId);
+        if (jndiPanel) jndiPanel.classList.toggle('hidden', type !== 'ejb');
+    }
+
+    /* ── JNDI プロファイル管理 ─────────────────── */
+    const JNDI_PROFILES_KEY = 'ejb-jndi-profiles';
+
+    function getJndiProfiles() {
+        try { return JSON.parse(localStorage.getItem(JNDI_PROFILES_KEY)) || []; }
+        catch { return []; }
+    }
+    function _saveJndiProfiles(profiles) {
+        localStorage.setItem(JNDI_PROFILES_KEY, JSON.stringify(profiles));
+    }
+
+    function renderJndiProfileOptions(tabId) {
+        const sel = document.getElementById('jndiSelect-' + tabId);
+        if (!sel) return;
+        const current = sel.value;
+        const profiles = getJndiProfiles();
+        sel.innerHTML = '<option value="">-- プロファイル選択 --</option>'
+            + profiles.map(p => `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
+        if (current) sel.value = current;
+    }
+
+    function toggleJndiPanel(tabId) {
+        const body  = document.getElementById('jndiBody-'  + tabId);
+        const arrow = document.getElementById('jndiArrow-' + tabId);
+        if (!body) return;
+        const open = body.classList.toggle('open');
+        if (arrow) arrow.classList.toggle('open', open);
+    }
+
+    function loadJndiProfile(tabId) {
+        const sel = document.getElementById('jndiSelect-' + tabId);
+        const name = sel ? sel.value : '';
+        if (!name) return;
+        const profile = getJndiProfiles().find(p => p.name === name);
+        if (!profile) return;
+        document.getElementById('jndiFactory-' + tabId).value   = profile.factory   || '';
+        document.getElementById('jndiUrl-'     + tabId).value   = profile.url       || '';
+        document.getElementById('jndiPrincipal-' + tabId).value = profile.principal || '';
+        document.getElementById('jndiCreds-'   + tabId).value   = profile.credentials || '';
+    }
+
+    function saveJndiProfile(tabId) {
+        const factory     = document.getElementById('jndiFactory-'   + tabId)?.value.trim() || '';
+        const url         = document.getElementById('jndiUrl-'       + tabId)?.value.trim() || '';
+        const principal   = document.getElementById('jndiPrincipal-' + tabId)?.value.trim() || '';
+        const credentials = document.getElementById('jndiCreds-'     + tabId)?.value        || '';
+        const sel         = document.getElementById('jndiSelect-'    + tabId);
+        const name = prompt('プロファイル名を入力してください', sel?.value || '');
+        if (!name || !name.trim()) return;
+        const profiles = getJndiProfiles();
+        const idx = profiles.findIndex(p => p.name === name.trim());
+        const profile = { name: name.trim(), factory, url, principal, credentials };
+        if (idx >= 0) profiles[idx] = profile; else profiles.push(profile);
+        _saveJndiProfiles(profiles);
+        tabs.forEach(t => renderJndiProfileOptions(t.id));
+        if (sel) sel.value = name.trim();
+    }
+
+    function deleteJndiProfile(tabId) {
+        const sel  = document.getElementById('jndiSelect-' + tabId);
+        const name = sel ? sel.value : '';
+        if (!name || !confirm(`プロファイル "${name}" を削除しますか？`)) return;
+        _saveJndiProfiles(getJndiProfiles().filter(p => p.name !== name));
+        tabs.forEach(t => renderJndiProfileOptions(t.id));
+    }
+
+    function getJndiDataForTab(tabId) {
+        const factory     = document.getElementById('jndiFactory-'   + tabId)?.value.trim();
+        const url         = document.getElementById('jndiUrl-'       + tabId)?.value.trim();
+        const principal   = document.getElementById('jndiPrincipal-' + tabId)?.value.trim();
+        const credentials = document.getElementById('jndiCreds-'     + tabId)?.value;
+        if (!factory && !url) return null;
+        return {
+            'java.naming.factory.initial':    factory     || '',
+            'java.naming.provider.url':        url         || '',
+            'java.naming.security.principal':  principal   || '',
+            'java.naming.security.credentials': credentials || ''
+        };
     }
 
     /* ── 抽出リスト ───────────────────────────── */

@@ -41,12 +41,29 @@ public class ApiController {
 
         ProcessResultDto result = ProcessResultDto.builder()
                 .requestJson(objectMapper.valueToTree(request))
-                .requestToString(request.toString())
+                .requestToString(buildEjbRequestToString(request))
                 .responseJson(objectMapper.valueToTree(response))
                 .responseToString(response.toString())
                 .build();
 
         return ResponseEntity.ok(result);
+    }
+
+    private String buildEjbRequestToString(ApiRequestDto request) {
+        StringBuilder sb = new StringBuilder();
+        if (request.getJndi() != null && !request.getJndi().isEmpty()) {
+            sb.append("JNDI Properties:\n");
+            request.getJndi().forEach((k, v) -> {
+                String display = k != null && k.contains("credentials") ? "*****" : v;
+                sb.append("  ").append(k).append(" = ").append(display).append('\n');
+            });
+            sb.append('\n');
+        }
+        sb.append("operationType=").append(request.getOperationType()).append('\n');
+        if (request.getData() != null) {
+            sb.append("data=").append(request.getData());
+        }
+        return sb.toString();
     }
 
     /** 外部HTTPプロキシ: POST /api/http-proxy */
