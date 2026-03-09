@@ -593,6 +593,33 @@
         .btn-hist-toggle.active { outline: 2px solid var(--accent); outline-offset: 1px; }
         .light-theme .btn-hist-toggle { background: #e0ecff; border-color: #6a9acc; color: #1a4a7a; }
 
+        /* ── タブ種別トグル (EJB / HTTP) ──────────── */
+        .type-toggle {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 1px;
+        }
+        .type-btn {
+            padding: 2px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            border: 1px solid var(--border-input);
+            color: var(--text-muted);
+            background: transparent;
+            user-select: none;
+            line-height: 1.6;
+        }
+        .type-btn:first-child { border-radius: 3px 0 0 3px; }
+        .type-btn:last-child  { border-radius: 0 3px 3px 0; border-left: none; }
+        .type-btn:hover { color: var(--text-secondary); background: var(--bg-input); }
+        .type-btn.active.ejb  { background: #2a3a5c; border-color: #4a6a9a; color: #a0c0ff; }
+        .type-btn.active.http { background: #1a4a2a; border-color: #2a8a4a; color: #60e080; }
+        .light-theme .type-btn.active.ejb  { background: #dde8ff; border-color: #6a8acc; color: #1a3a7a; }
+        .light-theme .type-btn.active.http { background: #d0f0d8; border-color: #2a8a4a; color: #0a5a1a; }
+
         .req-tab .tab-close {
             font-size: 14px;
             line-height: 1;
@@ -1010,6 +1037,7 @@
         const tab = {
             id,
             number: tabCounter,
+            type: 'ejb',
             dtoName: dtoName || 'New',
             label: null,
             memo: '',
@@ -1128,6 +1156,10 @@
             <div class="editor-panel">
                 <div class="panel-header">
                     <span>&#9654; Request</span>
+                    <div class="type-toggle" id="typeToggle-${tab.id}">
+                        <span class="type-btn ejb active" onclick="setTabType('${tab.id}','ejb')">EJB</span>
+                        <span class="type-btn http"       onclick="setTabType('${tab.id}','http')">HTTP</span>
+                    </div>
                 </div>
                 <div class="sub-tabs">
                     <div class="sub-tab active" data-side="req" data-sub="json"
@@ -1416,18 +1448,24 @@
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span><span>Sending…</span>';
-        setStatus('loading', 'EJB サービスを呼び出し中…');
+        const isHttp  = tab.type === 'http';
+        const endpoint = isHttp ? '/api/http-proxy' : '/api/process';
+        setStatus('loading', isHttp ? 'HTTP リクエスト送信中…' : 'EJB サービスを呼び出し中…');
         if (respHttpStatus) respHttpStatus.textContent = '';
         if (respTime) respTime.textContent = '';
 
-        addLog(tab, 'req', `[SEND] POST /api/process`);
+        if (isHttp) {
+            addLog(tab, 'req', `[SEND] ${(body.method || 'GET').toUpperCase()} ${body.url || ''}`);
+        } else {
+            addLog(tab, 'req', `[SEND] POST /api/process`);
+        }
         addLog(tab, 'req', `[SEND] Body: ${JSON.stringify(body).substring(0, 200)}`);
 
         tab._timestamp = new Date().toLocaleString('ja-JP');
         const t0 = performance.now();
 
         try {
-            const res     = await fetch('/api/process', {
+            const res     = await fetch(endpoint, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body:    JSON.stringify(body)
@@ -1788,6 +1826,47 @@
         sidebar.classList.toggle('collapsed', !historyOpen);
         document.getElementById('histToggleBtn').classList.toggle('active', historyOpen);
         if (historyOpen) renderHistoryList();
+    }
+
+    /* ── タブ種別切り替え ──────────────────────── */
+    const HTTP_TEMPLATE = JSON.stringify({
+        method:  'GET',
+        url:     'https://',
+        headers: { 'Accept': 'application/json' },
+        body:    null
+    }, null, 2);
+
+    const EJB_TEMPLATE = JSON.stringify({
+        operationType: '',
+        data: {}
+    }, null, 2);
+
+    function setTabType(tabId, type) {
+        const tab = tabs.find(t => t.id === tabId);
+        if (!tab || tab.type === type) return;
+        tab.type = type;
+
+        // トグルUI更新
+        const toggle = document.getElementById('typeToggle-' + tabId);
+        if (toggle) {
+            toggle.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.classList.contains(type));
+            });
+        }
+
+        // エディタテンプレート切り替え
+        const placeholder = '// Send ボタンを押してください (Ctrl+Enter)';
+        if (tab.inputEditor) {
+            tab.inputEditor.setValue(type === 'http' ? HTTP_TEMPLATE : EJB_TEMPLATE);
+        }
+        if (tab.outputEditor) tab.outputEditor.setValue(placeholder);
+        tab._httpStatus = null;
+        tab._respTime   = null;
+
+        const respHttpStatus = document.getElementById('respHttpStatus-' + tabId);
+        const respTime       = document.getElementById('respTime-' + tabId);
+        if (respHttpStatus) respHttpStatus.textContent = '';
+        if (respTime) respTime.textContent = '';
     }
 
     /* ── 抽出リスト ───────────────────────────── */
