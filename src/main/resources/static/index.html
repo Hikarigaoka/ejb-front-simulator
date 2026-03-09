@@ -1662,21 +1662,25 @@
         const key     = row.key.trim();
 
         // Source 設定に従って検索
-        let found = null;
+        const candidates = [];
         if (row.source === 'request') {
-            found = extractFromJson(reqJson, key);
+            const v = extractFromJson(reqJson, key);
+            if (v !== null) candidates.push(v);
         } else if (row.source === 'response') {
-            found = extractFromJson(resJson, key);
+            const v = extractFromJson(resJson, key);
+            if (v !== null) candidates.push(v);
         } else {
-            // all: request → response の順で試みる
-            found = extractFromJson(reqJson, key);
-            if (found === null) found = extractFromJson(resJson, key);
+            // all: request・response 両方から抽出してマージ
+            const vReq = extractFromJson(reqJson, key);
+            const vRes = extractFromJson(resJson, key);
+            if (vReq !== null) candidates.push(vReq);
+            if (vRes !== null) candidates.push(vRes);
         }
 
-        if (found === null) return;  // 見つからなければ Value は変えない
+        if (candidates.length === 0) return;  // 見つからなければ Value は変えない
 
         // 既存値に重複なし追記（カンマ区切り）
-        const newVals  = found.split(',').map(s => s.trim()).filter(Boolean);
+        const newVals  = candidates.flatMap(c => c.split(',').map(s => s.trim())).filter(Boolean);
         const existing = row.value ? row.value.split(',').map(s => s.trim()).filter(Boolean) : [];
         const merged   = [...existing];
         for (const v of newVals) {
