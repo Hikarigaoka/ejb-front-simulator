@@ -1829,11 +1829,15 @@
     }
 
     /* ── タブ種別切り替え ──────────────────────── */
+    // HTTP テンプレート
+    // Web API (JSON) : body にオブジェクト → Content-Type: application/json を自動付与
+    // Form POST      : headers に "Content-Type":"application/x-www-form-urlencoded" を追加すると
+    //                  body オブジェクトを key=value&... 形式で自動エンコード
     const HTTP_TEMPLATE = JSON.stringify({
-        method:  'GET',
+        method:  'POST',
         url:     'https://',
         headers: { 'Accept': 'application/json' },
-        body:    null
+        body:    {}
     }, null, 2);
 
     const EJB_TEMPLATE = JSON.stringify({

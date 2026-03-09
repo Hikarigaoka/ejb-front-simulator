@@ -11,10 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,14 +44,30 @@ public class HttpProxyService {
 
         log.info(">>> HTTP-PROXY {} {}", method, url);
 
-        // body文字列化
+        // Content-Type を解決 (ヘッダーから取得、なければ body の型で推定)
+        String contentType = request.getHeaders() == null ? null
+                : request.getHeaders().entrySet().stream()
+                        .filter(e -> "content-type".equalsIgnoreCase(e.getKey()))
+                        .map(Map.Entry::getValue)
+                        .findFirst().orElse(null);
+
+        // body 文字列化 (Content-Type に応じてエンコード方式を切り替え)
         String bodyStr = "";
         try {
             JsonNode bodyNode = request.getBody();
             if (bodyNode != null && !bodyNode.isNull()) {
-                bodyStr = bodyNode.isTextual()
-                        ? bodyNode.asText()
-                        : objectMapper.writeValueAsString(bodyNode);
+                if (contentType != null && contentType.contains("application/x-www-form-urlencoded")) {
+                    bodyStr = toFormEncoded(bodyNode);
+                } else if (bodyNode.isTextual()) {
+                    bodyStr = bodyNode.asText();
+                } else {
+                    bodyStr = objectMapper.writeValueAsString(bodyNode);
+                    // Content-Type 未指定でJSONオブジェクトなら自動付与
+                    if (contentType == null) {
+                        request.getHeaders().putIfAbsent("Content-Type", "application/json");
+                        contentType = "application/json";
+                    }
+                }
             }
         } catch (Exception e) {
             log.warn("body serialization failed", e);
@@ -124,6 +143,22 @@ public class HttpProxyService {
 
             return ResponseEntity.status(502).body(result);
         }
+    }
+
+    /** JSON オブジェクトを application/x-www-form-urlencoded 形式に変換 */
+    private String toFormEncoded(JsonNode node) {
+        if (!node.isObject()) {
+            return URLEncoder.encode(node.asText(), StandardCharsets.UTF_8);
+        }
+        List<String> pairs = new ArrayList<>();
+        node.fields().forEachRemaining(e -> {
+            String key = URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8);
+            String val = URLEncoder.encode(
+                    e.getValue().isTextual() ? e.getValue().asText() : e.getValue().toString(),
+                    StandardCharsets.UTF_8);
+            pairs.add(key + "=" + val);
+        });
+        return String.join("&", pairs);
     }
 
     private String buildRequestToString(String method, String url,
