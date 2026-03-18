@@ -18,4 +18,7 @@ public class ApiRequestDto {
 
     /** 操作固有のパラメータマップ */
     private Map<String, Object> data;
+
+    /** JNDI接続プロパティ (実EJBサーバー接続時に使用) */
+    private Map<String, String> jndi;
 }
